@@ -58,7 +58,8 @@
         // This is the easiest way to have default options.
         var settings = $.extend({
             visibleSlides: 3,
-            videoAdapters: []
+            videoAdapters: [],
+            cycleOptions: {}
         }, options );
         _videoAdapters = $.extend(_videoAdapters, settings.videoAdapters);
 
@@ -119,10 +120,10 @@
                     'margin-top': - ($el.find('.part-slider-inner .slide.video .slide-play').height()/2) + 'px'
                 })
 
-                $el.find('.slideshow').cycle({
+                $el.find('.slideshow').cycle($.extend({
                     slides: '> .slide',
                     next: '#'+id+' .cycle-next'
-                });
+                }, settings.cycleOptions));
             }
 
             function addDynamicTags () {
