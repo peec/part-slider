@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+    <title>Part slideshow</title>
+    <script src="https://code.jquery.com/jquery-1.11.2.js"></script>
+    <script src="http://malsup.github.io/jquery.cycle2.js"></script>
+    <script src="http://malsup.github.io/jquery.cycle2.carousel.js"></script>
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <script src="partslideshow.jquery.js"></script>
+    <link rel="stylesheet" href="partslideshow.jquery.css" type="text/css" />
+
+    <script>
+        $(function () {
+            $('.part-slider-1').partSlideshow({
+                visibleSlides: 3
+            });
+            $('.part-slider-2').partSlideshow({
+                visibleSlides: 2
+            });
+        });
+    </script>
+</head>
+<body>
+
+
+<!-- 16/9 -->
+
+<div class="part-slider part-slider-1">
+    <div class="slide">
+        <img src="/images/1.jpg">
+    </div>
+
+
+    <!-- A youtube vid.. -->
+    <div class="slide video">
+        <a href="https://www.youtube.com/watch?v=JvUMV1N7eGM"></a>
+    </div>
+    <!-- A vimeo vid.. -->
+    <div class="slide video">
+        <a href="https://vimeo.com/16292317"></a>
+    </div>
+
+    <!-- Normal image -->
+    <div class="slide">
+        <img src="/images/4.jpg">
+        <div class="info">
+            <p>This is a sample image with text.</p>
+        </div>
+    </div>
+
+    <!-- An image -->
+    <div class="slide">
+        <img src="/images/3.jpg">
+    </div>
+
+    <!-- A youtube vid.. -->
+    <div class="slide video">
+        <a href="https://www.youtube.com/watch?v=yFLtfaJwyfw">
+            <img src="http://img.youtube.com/vi/yFLtfaJwyfw/maxresdefault.jpg">
+        </a>
+    </div>
+
+</div>
+
+
+<!-- 4/3 -->
+
+
+
+<div class="part-slider part-slider-2">
+    <div class="slide">
+        <img src="/images/43/1.jpg">
+    </div>
+
+    <div class="slide">
+        <img src="/images/43/2.jpg">
+    </div>
+
+    <div class="slide">
+        <img src="/images/43/3.jpg">
+    </div>
+</div>
+
+
+</body>
+</html>
