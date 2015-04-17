@@ -1,11 +1,24 @@
-# Slide part
+# Part Slider
 
-This slideshow plugin is a implementation of cycle2, and cycle2 is required.
+A slideshow plugin for jQuery, minimal effort to get it working.
 
-### Feature List
+**Why is it named Part Slider**
+
+The idea is to have a slideshow that shows X amount of images, the last one is "partly" showed so the user is tempted
+to click on the Next arrow to see more.
+
+
+
+## EXAMPLE:
+
+![Sample of 2 slideshows](https://raw.github.com/peec/part-slider/master/images/screenshot.png)
+
+
+
+
+### FEATURES
 
 - Advanced slideshow that shows parts of images on the sides.
-- See sample below.
 - Supports: youtube, vimeo vids.
 - Extensible: customize cycle2 options, add video adapters to support more movies!
 - Allows to use another thumbnail then the vimeo / youtube onces.
@@ -13,27 +26,28 @@ This slideshow plugin is a implementation of cycle2, and cycle2 is required.
 - Responsive.
 - Built on top of cycle2.
 
+### SUPPORTED VIDEO ADAPTERS
+
+- YouTube
+- Vimeo
+- Kaltura
 
 
-### Dependencies
+### DEPENDENCIES
 
 - JQuery
 - Cycle2
+- Font-awesome for the next / prev arrows. ( not required ).
+
+
+
+### INSTALLATION:
+
+See `index.html` file in this repository.
 
 
 ## TODO
 
 - Add player support for video adapters with overlay and video in middle.
 - Finetune.
-
-
-### Installation:
-
-See `index.html` file in this repository.
-
-
-
-## SAMPLE:
-
-![Sample of 2 slideshows](https://raw.github.com/peec/part-slider/master/images/screenshot.png)
 
