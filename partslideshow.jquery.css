@@ -14,7 +14,7 @@
 
 }
 
-.slideshow {
+.part-slider .slideshow {
     overflow: visible !important;
     width: 100%;
 }
@@ -30,18 +30,18 @@
     color: white;
 }
 
-.slide {
+.part-slider .slide {
     overflow: hidden;
 }
 
 
-.slide .info {
+.part-slider .slide .info {
     position: absolute;
     bottom: 5px;
     left: 0;
     width: 100%;
 }
-.slide .info p {
+.part-slider .slide .info p {
     background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.35)), color-stop(.1,rgba(0,0,0,0.001)));
     color: #EFEFEF;
     padding: 15px 0 15px 15px;
