@@ -21,13 +21,39 @@
 
 .part-slider-inner .cycle-next {
     color: #fff;
-    color: black;
     position: absolute;
     z-index: 9999;
-    top: 50%;
+    top: 0;
     right: 0;
-    font-size: 30px;
-    color: white;
+
+    padding-left: 15px;
+    padding-right: 30px;
+
+
+    background-image: -webkit-gradient(linear, left top, right top, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.45)), color-stop(.1,rgba(0,0,0,0.099)));
+
+    height: 100%;
+    text-align: center;
+
+}
+
+.part-slider-inner .cycle-next .cycle-next-icon {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    font-size: 60px;
+    margin-top: -30px;
+    font-family: FontAwesome;
+    font-style: normal;
+    font-weight: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.part-slider-inner .cycle-next .cycle-next-icon:focus {
+    outline: 0;
+}
+.part-slider-inner .cycle-next .cycle-next-icon:before {
+    content: "\f105";
 }
 
 .part-slider .slide {
@@ -37,15 +63,16 @@
 
 .part-slider .slide .info {
     position: absolute;
-    bottom: 5px;
+    bottom: 0;
     left: 0;
     width: 100%;
 }
 .part-slider .slide .info p {
-    background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.35)), color-stop(.1,rgba(0,0,0,0.001)));
+    background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.65)), color-stop(.1,rgba(0,0,0,0.001)));
     color: #EFEFEF;
-    padding: 15px 0 15px 15px;
+    padding: 15px 0 10px 15px;
     margin: 0;
+    white-space: normal;
 }
 
 .part-slider-inner .slide {
@@ -87,4 +114,43 @@
     .part-slider-inner .slide-icon-size {
         font-size: 2.5em;
     }
+}
+
+.part-slider .part-slider-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 10000;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.part-slider .part-slider-overlay  .part-slider-overlay-inner {
+    position: fixed;
+    top: 50%;
+    /* Calculated by js:
+    left: 50%;
+    margin-top: -100px;
+    margin-left: -150px;
+    */
+    z-index: 100000;
+}
+
+.part-slider .part-slider-overlay  .part-slider-overlay-inner img {
+    width: 100%;
+}
+
+.part-slider .part-slider-overlay .part-slider-video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 60%;
+}
+.part-slider .part-slider-overlay .part-slider-video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
