@@ -90,6 +90,9 @@
     function createPlayerContainer ($container, $slide, $a, playerMaxWidth) { 
         var $o;
         destroyPlayerContainer($container);
+
+
+
         if ($slide.hasClass('video')) {
                 var $links = $a;
 
@@ -130,27 +133,54 @@
 
 
         var closeEvent = function(e) {
-            if (e.keyCode == 27) {                             
-                destroyPlayerContainer($container);
-                $(document).unbind("keyup", closeEvent);
-                $(window).unbind("resize", resizePlayer);
+            if (e.keyCode == 27) {
+                closePlayer();
             } 
         };
 
-        $(document).keyup(closeEvent);
 
         var mouseCloseEvent = function(event) {
             if (!$(event.target).closest('.part-slider-overlay-inner').length) {
-                destroyPlayerContainer($container);
-                $(document).unbind("click", mouseCloseEvent);
-                $(window).unbind("resize", resizePlayer);
+                closePlayer();
             }
         };
 
-        // We use setTimeout because else the click fires at first when we try open 
-        // the player - which is not correct, so move it back in callstack..
-        setTimeout(function() { $(document).on('click', mouseCloseEvent);}, 1);
-                
+        var popState = function() {
+            var hashLocation = location.hash;
+            var hashSplit = hashLocation.split("#!/");
+            var hashName = hashSplit[1];
+
+            if (hashName !== '') {
+                var hash = window.location.hash;
+                if (hash === '') {
+                    unbindAndClose();
+                }
+            }
+        };
+
+        function unbindAndClose () {
+            destroyPlayerContainer($container);
+            $(document).unbind("keyup", closeEvent);
+            $(document).unbind("click", mouseCloseEvent);
+            $(window).unbind("resize", resizePlayer);
+            $(window).unbind('popstate', popState);
+        }
+
+        function closePlayer() {
+            if (window.history && window.history.pushState) {
+                window.history.back();
+            } else {
+                unbindAndClose();
+            }
+        }
+
+        if (window.history && window.history.pushState) {
+            $(window).on('popstate', popState);
+            window.history.pushState('forward', null, '#previewslide');
+        }
+
+
+
         function resizePlayer () {
             // Since video iframes have 0 width.. 
             if ($slide.hasClass('video')) {
@@ -176,8 +206,12 @@
             }
         }
         resizePlayer();
+
+        // We use setTimeout because else the click fires at first when we try open
+        // the player - which is not correct, so move it back in callstack..
+        setTimeout(function() { $(document).on('click', mouseCloseEvent);}, 1);
+        $(document).keyup(closeEvent);
         $(window).resize(resizePlayer);
-        
     }
 
 
