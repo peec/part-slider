@@ -46,8 +46,4 @@ to click on the Next arrow to see more.
 See `index.html` file in this repository.
 
 
-## TODO
-
-- Add player support for video adapters with overlay and video in middle.
-- Finetune.
 
