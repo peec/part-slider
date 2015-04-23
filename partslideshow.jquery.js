@@ -182,13 +182,12 @@
 
 
         function resizePlayer () {
+            $wrap.css({'max-width': playerMaxWidth + 'px'});
             // Since video iframes have 0 width.. 
-            if ($slide.hasClass('video')) {
-                // Deal with iframes...
-                $wrap.width($(window).width() < playerMaxWidth ? $(window).width() : playerMaxWidth);
-            } else {
-                $wrap.css({'max-width': playerMaxWidth + 'px'});
-            }
+            var ww =  $(window).width(),
+                w = ww < playerMaxWidth ? ww : playerMaxWidth;
+            // Deal with iframes...
+            $wrap.width(w);
 
             $wrap.css({
                 'margin-top': -($wrap.height()/2) + 'px'
