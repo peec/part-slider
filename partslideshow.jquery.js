@@ -1,8 +1,61 @@
 (function ( $ ) {
 
+    /**
+     * Default settings.
+     */
+    var defaultSettings = {
+
+        // How many slides to show at the time.
+        visibleSlides: 3,
+
+        // Video adapters.
+        videoAdapters: {},
+
+        // Cycle options ( see cycle documentation API for available options ).
+        cycleOptions: {},
+
+        // How should we crop the images? Examples: 16/9 , 4/3 , 1 etc.
+        // Set to 0 to disable auto crop / zoom effects.
+        aspectRatio: 16/9,
+
+        // Player max width when clicking on images / video thumbnails.
+        // Will be scaled down when in mobile view etc.
+        // Effective when screens are larger then 800 width!
+        playerMaxWidth: 800,
+
+        // Zooms to center if images was cropped, false to disable
+        zoomCenter: true,
+
+        // Kaltura video adapter options. Set the correct partner ID and kalturaPortal name.
+        kaltura: {
+            // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+            partnerId: '1484431',
+            // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+            uiconfId: '28551341',
+            // Where are your videos located? This will be used to replace video urls to actual preview images.
+            kalturaPortal: 'https://uia.mediaspace.kaltura.com',
+            // Image url, only change if kaltura changed format of thumbnail API.
+            imageUrl: 'http://www.kaltura.com/p/{partner_id}/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
+            embedArgs: 'iframeembed=true&playerId=kplayer&entry_id={entry_id}&flashvars[streamerType]=auto'
+        }
+    };
+
+
+
+    /**
+     * Iterator for every slideshow spawned on the page..
+     */
     var slideshowIterator = 0;
 
+
+    /**
+     * Built in Video Adapters to allow embeding videos as slides.
+     */
     var _videoAdapters = {
+
+        /**
+         * Youtube
+         */
         youtube: {
             regex: /^.*(youtu.be\/|v\/|e\/|u\/\w+\/|embed\/|v=)([^#\&\?]*).*/,
             match: function (url) {
@@ -19,12 +72,18 @@
             image: function (url, $link) {
                 var id = this.videoId(url);
                 $link.append($("<img src=\"http://img.youtube.com/vi/"+id+"/maxresdefault.jpg\" />"));
+                return $.Deferred().resolve().promise();
+
             },
             embed: function (url) {
                 var id = this.videoId(url);
                 return $('<iframe width="560" height="315" src="https://www.youtube.com/embed/'+id+'" frameborder="0" allowfullscreen></iframe>');
             }
         },
+
+        /**
+         * Vimeo
+         */
         vimeo: {
             regex: /\/\/(?:www\.)?vimeo.com\/([0-9a-z\-_]+)/i,
             match: function (url) {
@@ -35,6 +94,7 @@
                 return matches && matches[1];
             },
             image: function (url, $link) {
+                var $def = $.Deferred();
                 var video_id = this.videoId(url);
                 $.ajax({
                     type:'GET',
@@ -44,18 +104,64 @@
                     success: function(data){
                         var thumbnail_src = data[0].thumbnail_large;
                         $link.append($("<img src='"+thumbnail_src+"' />"));
+                        $def.resolve();
                     }
                 });
+                return $def;
             },
             embed: function (url) {
                 var video_id = this.videoId(url);
                 return $('<iframe src="//player.vimeo.com/video/'+video_id+'" width="560" height="315" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>');
             }
+        },
+
+        /**
+         * Kaltura
+         * @param settings
+         * @returns {{regex: Function, match: Function, videoId: Function, image: Function, embed: Function}}
+         */
+        kaltura: function (settings) {
+            // Configurable by settings so place here.
+            return {
+                regex: function () {
+                    return new RegExp('^'+settings.kaltura.kalturaPortal + '.*\/([0-9]_[0-9a-zA-Z-_]+)$', 'i');
+                },
+                match: function (url) {
+                    return url.match(this.regex());
+                },
+                videoId: function (url) {
+                    var matches = this.regex().exec(url);
+                    return matches && matches[1];
+                },
+                image: function (url, $link) {
+                    // http://www.kaltura.com/p/1484431/thumbnail/entry_id/1_iaju9jvc?width=600
+                    var id = this.videoId(url),
+                        useUrl = settings.kaltura.imageUrl.replace('{partner_id}', settings.kaltura.partnerId).replace('{entry_id}', id);
+
+                    $link.append($("<img src='"+useUrl+"' />"));
+                    return $.Deferred().resolve().promise();
+                },
+                embed: function (url) {
+                    var id = this.videoId(url);
+                    var $iframe = $('<iframe src="" width="560" height="395" allowfullscreen webkitallowfullscreen mozAllowFullScreen frameborder="0"></iframe>');
+                    $iframe.attr('src', '//cdnapi.kaltura.com/p/'+settings.kaltura.partnerId+'/sp/'+settings.kaltura.partnerId+'00/embedIframeJs/uiconf_id/' + settings.kaltura.uiconfId +
+                        '/partner_id/'+settings.kaltura.partnerId+'?' + settings.kaltura.embedArgs.replace('{entry_id}', id));
+                    return $iframe;
+                }
+            };
         }
     };
 
 
-
+    /**
+     * Scales an image based on what dimensions it should have, and centeres it perfectly. This means that images
+     * with the wrong aspect ratio also will be displayed just fine.
+     *
+     * @param $img
+     * @param shouldHaveWidth
+     * @param shouldHaveHeight
+     * @param zoomCenter
+     */
     function scaleImg($img, shouldHaveWidth, shouldHaveHeight, zoomCenter) {
 
         var h = $img.height(), w = $img.width();
@@ -82,19 +188,26 @@
     }
 
 
-    function destroyPlayerContainer ($container) {
-        $container.find('.part-slider-player').remove();
-        
-    }
+    /**
+     * Player is a modal with transparent background and opacity background effect.
+     * Used to pop out images and videos in large sizes when clicked.
+     */
+    var Player = (function () {
 
-    function createPlayerContainer ($container, $slide, $a, playerMaxWidth) { 
-        var $o;
-        destroyPlayerContainer($container);
+        //
+        // PRIVATE API
+        //
 
 
-
-        if ($slide.hasClass('video')) {
-                var $links = $a;
+        /**
+         * Fills modal with DOM from the slide or if its a video, the embed player.
+         * @constructor
+         */
+        var FillModal = function () {
+            var that = this,
+                $o;
+            if (that.$slide.hasClass('video')) {
+                var $links = that.$a;
 
                 if ($links.length) {
                     $links.each(function () {
@@ -102,192 +215,174 @@
                         $.each(_videoAdapters, function (index, item) {
                             var url = $link.attr('href');
                             if (item.match(url)) {
-                                $slide.data('videoadapter', index);
+                                that.$slide.data('videoadapter', index);
                             }
                         });
 
                     });
                 }
-       
-            if (!$slide.data('videoadapter')) {
-                console.error("No video adapter was assigned to slide (empty adapter in data attribute).");
-                return;
-            }
-            if (typeof _videoAdapters[$slide.data('videoadapter')].embed === 'undefined') {
-                console.error("Video player for adapter '" + $slide.data('videoadapter') + "' was not found. Please implement the 'embed' key in the adapter.");
-                return;
+
+                if (!that.$slide.data('videoadapter')) {
+                    console.error("No video adapter was assigned to slide (empty adapter in data attribute).");
+                    return;
+                }
+                if (typeof _videoAdapters[that.$slide.data('videoadapter')].embed === 'undefined') {
+                    console.error("Video player for adapter '" + that.$slide.data('videoadapter') + "' was not found. Please implement the 'embed' key in the adapter.");
+                    return;
+                } else {
+                    var $iframe = _videoAdapters[that.$slide.data('videoadapter')].embed(that.$a.attr('href'));
+                    $o = $('<div class="part-slider-video-wrapper"></div>');
+                    $o.html($iframe);
+                }
             } else {
-                var $iframe = _videoAdapters[$slide.data('videoadapter')].embed($a.attr('href'));
-                $o = $('<div class="part-slider-video-wrapper"></div>');
-                $o.html($iframe);
+                var $img = that.$slide.find('img');
+                $o = $('<img />');
+                $o.attr('src', $img.attr('src'));
             }
-        } else {
-            var $img = $slide.find('img');
-            $o = $('<img />');
-            $o.attr('src', $img.attr('src'));
-        }
-        var $wrap = $('<div class="part-slider-overlay-inner"></div>');
-        var html = $wrap.html($o);
-        var $el = $('<div class="part-slider-overlay part-slider-player"></div>').html(html);
-        $container.append($el);
+            var $wrap = $('<div class="part-slider-overlay-inner"></div>');
+            $wrap.append($o);
 
-
-        var closeEvent = function(e) {
-            if (e.keyCode == 27) {
-                closePlayer();
-            } 
+            // Append .info's if any.
+            var $infos = that.$slide.find('.info').clone(false);
+            if ($infos.length) {
+                $wrap.append($infos);
+            }
+            // Add the wrap object to the players inner part.
+            var html = $wrap;
+            var $el = $('<div class="part-slider-overlay part-slider-player"></div>').html(html);
+            that.$container.append($el);
         };
 
 
-        var mouseCloseEvent = function(event) {
-            if (!$(event.target).closest('.part-slider-overlay-inner').length) {
-                closePlayer();
-            }
-        };
+        /**
+         * Events
+         * @returns {{mouseCloseEvent: Function, closeEvent: Function, popStateEvent: Function, resize: Function, bind: Function, unbind: Function}}
+         * @constructor
+         */
+        var Events = function () {
+            var that = this;
 
-        var popState = function() {
-            var hashLocation = location.hash;
-            var hashSplit = hashLocation.split("#!/");
-            var hashName = hashSplit[1];
 
-            if (hashName !== '') {
-                var hash = window.location.hash;
-                if (hash === '') {
-                    unbindAndClose();
+            function requestClose () {
+                if (window.history && window.history.pushState) {
+                    window.history.back();
+                } else {
+                    that.destroy();
                 }
             }
+
+            return {
+                mouseCloseEvent: function(event) {
+                    if (!$(event.target).closest('.part-slider-overlay-inner').length) {
+                        requestClose();
+                    }
+                },
+                closeEvent: function(e) {
+                    if (e.keyCode == 27) {
+                        requestClose();
+                    }
+                },
+                popStateEvent: function() {
+                    var hashLocation = location.hash;
+                    var hashSplit = hashLocation.split("#!/");
+                    var hashName = hashSplit[1];
+
+                    if (hashName !== '') {
+                        var hash = window.location.hash;
+                        if (hash === '') {
+                            that.destroy();
+                        }
+                    }
+                },
+                resize: function () {
+                    var $wrap = that.$container.find('.part-slider-overlay-inner');
+
+                    $wrap.css({'max-width': that.playerMaxWidth + 'px'});
+                    // Since video iframes have 0 width..
+                    var ww =  $(window).width(),
+                        w = ww < that.playerMaxWidth ? ww : that.playerMaxWidth;
+                    // Deal with iframes...
+                    $wrap.width(w);
+
+                    $wrap.css({
+                        'margin-top': -($wrap.height()/2) + 'px'
+                    });
+                    if ($(document).width() > $wrap.width()) {
+                        $wrap.css({
+                            'left': '50%',
+                            'margin-left': -($wrap.width()/2) + 'px'
+                        });
+                    } else {
+                        $wrap.css({
+                            'left': '0',
+                            'margin-left': '0px'
+                        });
+                    }
+                },
+                bind: function () {
+                    var eventThat  = this;
+                    // We use setTimeout because else the click fires at first when we try open
+                    // the player - which is not correct, so move it back in callstack..
+                    setTimeout(function() { $(document).on('click', eventThat.mouseCloseEvent);}, 1);
+                    $(document).keyup(this.closeEvent);
+                    $(window).resize(this.resize);
+
+                    if (window.history && window.history.pushState) {
+                        $(window).on('popstate', this.popStateEvent);
+                        window.history.pushState('forward', null, '#previewslide');
+                    }
+
+                },
+                unbind: function() {
+                    $(document).unbind("keyup", this.closeEvent);
+                    $(document).unbind("click", this.mouseCloseEvent);
+                    $(window).unbind("resize", this.resize);
+                    $(window).unbind('popstate', this.popStateEvent);
+                }
+            };
         };
 
-        function unbindAndClose () {
-            destroyPlayerContainer($container);
-            $(document).unbind("keyup", closeEvent);
-            $(document).unbind("click", mouseCloseEvent);
-            $(window).unbind("resize", resizePlayer);
-            $(window).unbind('popstate', popState);
-        }
+        return function ($container, $slide, $a, playerMaxWidth) {
+            this.$container = $container;
+            this.$slide = $slide;
+            this.$a = $a;
+            this.playerMaxWidth = playerMaxWidth;
 
-        function closePlayer() {
-            if (window.history && window.history.pushState) {
-                window.history.back();
-            } else {
-                unbindAndClose();
-            }
-        }
+            var events = Events.apply(this);
 
-        if (window.history && window.history.pushState) {
-            $(window).on('popstate', popState);
-            window.history.pushState('forward', null, '#previewslide');
-        }
+            this.destroy = function  () {
+                events.unbind();
+                this.$container.find('.part-slider-player').remove();
+            };
+
+            this.play = function  () {
+                this.destroy();
+                FillModal.apply(this);
+                events.resize();
+                events.bind();
+            };
+        };
+    })();
 
 
 
-        function resizePlayer () {
-            $wrap.css({'max-width': playerMaxWidth + 'px'});
-            // Since video iframes have 0 width.. 
-            var ww =  $(window).width(),
-                w = ww < playerMaxWidth ? ww : playerMaxWidth;
-            // Deal with iframes...
-            $wrap.width(w);
 
-            $wrap.css({
-                'margin-top': -($wrap.height()/2) + 'px'
-            }); 
-            if ($(document).width() > $wrap.width()) {
-                $wrap.css({
-                    'left': '50%',
-                    'margin-left': -($wrap.width()/2) + 'px'
-                });
-            } else {
-                $wrap.css({
-                    'left': '0',
-                    'margin-left': '0px'
-                });
-            }
-        }
-        resizePlayer();
-
-        // We use setTimeout because else the click fires at first when we try open
-        // the player - which is not correct, so move it back in callstack..
-        setTimeout(function() { $(document).on('click', mouseCloseEvent);}, 1);
-        $(document).keyup(closeEvent);
-        $(window).resize(resizePlayer);
-    }
 
 
     $.fn.partSlideshow = function( options ) {
 
-        var defaultSettings = {
-
-            // How many slides to show at the time.
-            visibleSlides: 3,
-
-            // Video adapters.
-            videoAdapters: {},
-
-            // Cycle options ( see cycle documentation API for available options ).
-            cycleOptions: {},
-
-            // How should we crop the images? Examples: 16/9 , 4/3 , 1 etc.
-            // Set to 0 to disable auto crop / zoom effects.
-            aspectRatio: 16/9,
-
-            // Player max width when clicking on images / video thumbnails.
-            // Will be scaled down when in mobile view etc.
-            // Effective when screens are larger then 800 width!
-            playerMaxWidth: 800,
-
-            // Zooms to center if images was cropped, false to disable
-            zoomCenter: true,
-
-            // Kaltura video adapter options. Set the correct partner ID and kalturaPortal name.
-            kaltura: {
-                // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
-                partnerId: '1484431',
-                // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
-                uiconfId: '28551341',
-                // Where are your videos located? This will be used to replace video urls to actual preview images.
-                kalturaPortal: 'https://uia.mediaspace.kaltura.com',
-                // Image url, only change if kaltura changed format of thumbnail API.
-                imageUrl: 'http://www.kaltura.com/p/{partner_id}/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
-                embedArgs: 'iframeembed=true&playerId=kplayer&entry_id={entry_id}&flashvars[streamerType]=auto'
-            }
-        };
-
         // This is the easiest way to have default options.
         var settings = $.extend(defaultSettings, options);
-
-
-        // Configurable by settings so place here.
-        _videoAdapters['kaltura'] = {
-            regex: function () {
-                return new RegExp('^'+settings.kaltura.kalturaPortal + '.*\/([0-9]_[0-9a-zA-Z-_]+)$', 'i');
-            },
-            match: function (url) {
-                return url.match(this.regex());
-            },
-            videoId: function (url) {
-                var matches = this.regex().exec(url);
-                return matches && matches[1];
-            },
-            image: function (url, $link) {
-                // http://www.kaltura.com/p/1484431/thumbnail/entry_id/1_iaju9jvc?width=600
-                var id = this.videoId(url),
-                    useUrl = settings.kaltura.imageUrl.replace('{partner_id}', settings.kaltura.partnerId).replace('{entry_id}', id);
-
-                $link.append($("<img src='"+useUrl+"' />"));
-            },
-            embed: function (url) {
-                var id = this.videoId(url);
-                var $iframe = $('<iframe src="" width="560" height="395" allowfullscreen webkitallowfullscreen mozAllowFullScreen frameborder="0"></iframe>');               
-                $iframe.attr('src', '//cdnapi.kaltura.com/p/'+settings.kaltura.partnerId+'/sp/'+settings.kaltura.partnerId+'00/embedIframeJs/uiconf_id/' + settings.kaltura.uiconfId + 
-                                    '/partner_id/'+settings.kaltura.partnerId+'?' + settings.kaltura.embedArgs.replace('{entry_id}', id));
-                return $iframe;
-            }
-        };
 
         // Allow to add video adapters (and override ).
         _videoAdapters = $.extend(_videoAdapters, settings.videoAdapters);
 
+        // Check for videoAdapters as callables, call these with supplied settings..
+        $.each(_videoAdapters, function (index, adapter) {
+            if (typeof adapter === 'function') {
+                _videoAdapters[index] = adapter.call({}, settings);
+            }
+        });
 
 
         this.each(function () {
@@ -308,14 +403,20 @@
                 '</div>'+
                 '<a href="#" class="cycle-next"><span class="cycle-next-icon"></span></a>' +
                 '</div></div>');
-            $cycleWrapper.find('.slideshow').append($el.html());
-            $el.html($cycleWrapper);
+            $cycleWrapper.find('.slideshow').html($el.clone(false).html());
+            $el.empty();
 
 
+            $cycleWrapper.find('.part-slider-inner .slide.video').each(function () {
+                var $slide = $(this);
+                var $overlay = $('<div class="slide-play"><span class="fa-stack fa-4x slide-icon-size"><i class="fa fa-circle fa-stack-2x slide-icon-background"></i><i class="fa fa-play fa-stack-1x slide-icon"></i></span></div>');
+                $slide.find("a").append($overlay);
+            });
 
+            var thumbnailPromises = [];
             // Video embed
             // Preprocess slides
-            $el.find('.slide').each(function () {
+            $cycleWrapper.find('.slide').each(function () {
                 var $slide = $(this),
                     $links = $slide.find('a');
 
@@ -327,7 +428,7 @@
                             if (item.match(url)) {
                                 var $image = $link.find('img');
                                 if (!$image.length) {
-                                    item.image(url, $link);
+                                    thumbnailPromises.push(item.image(url, $link));
                                 }
                             }
                         });
@@ -337,84 +438,89 @@
             });
 
 
-            $el.on('click','.slide a[data-modal]', function (e) {
-                e.preventDefault();
-                var $a = $(this), $slide = $a.parents('.slide');
-                createPlayerContainer($el, $slide, $a, settings.playerMaxWidth);
-            });
+
+            $.when.apply($,thumbnailPromises).then(function() {
+
+                var copy = $cycleWrapper.clone(false);
+
+                // For responsiveness.
+                function resizeSlides () {
+
+                    // Free up mem.
+                    if ($el.find('.slideshow').length) {
+                        $el.find('.slideshow').cycle('destroy');
+                    }
+
+                    $el.html(copy.clone(false));
+
+                    if (settings.aspectRatio) {
+                        $el.find('.slide img').load(function () {
+                            scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
+                        });
+                    }
 
 
+                    shouldHaveWidth = $el.find('.part-slider-container').outerWidth(true) / settings.visibleSlides;
 
-            // For responsiveness.
-            function resizeSlides () {
+                    var css = {
+                        width: shouldHaveWidth + 'px'
+                    };
 
-                if (cycleInitialized) {
-                    $el.find('.slideshow').cycle('destroy');
+                    if (settings.aspectRatio) {
+                        shouldHaveHeight = shouldHaveWidth / settings.aspectRatio;
+                        css['height'] = parseInt(shouldHaveHeight, 10) + 'px';
+                    }
+
+                    var $slides = $el.find('.part-slider-inner .slide');
+                    $slides.css(css);
+
+                    $el.find('.part-slider-inner .slide-play').css({
+                        'margin-top': - ($el.find('.part-slider-inner .slide.video .slide-play').height()/2) + 'px'
+                    });
+
+
+                    $el.find('.slideshow').cycle($.extend({
+                        slides: '> .slide',
+                        next: '#'+id+' .cycle-next',
+                        log: false,
+                        autoWidth: 0
+                    }, settings.cycleOptions));
+
+                    if (cycleInitialized && settings.aspectRatio) {
+                        $el.find('.slide img').each(function () {
+                            scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
+                        });
+                    }
+
+
+                    cycleInitialized = true;
+
+                    $el.trigger('part-slider:initialized');
+
                 }
 
-                shouldHaveWidth = $el.find('.part-slider-container').outerWidth(true) / settings.visibleSlides;
+                resizeSlides();
 
-                var css = {
-                    width: shouldHaveWidth + 'px'
-                };
-
-                if (settings.aspectRatio) {
-                    shouldHaveHeight = shouldHaveWidth / settings.aspectRatio;
-                    css['height'] = parseInt(shouldHaveHeight, 10) + 'px';
-                }
-
-                var $slides = $el.find('.part-slider-inner .slide');
-                $slides.css(css);
-
-                $el.find('.part-slider-inner .slide-play').css({
-                    'margin-top': - ($el.find('.part-slider-inner .slide.video .slide-play').height()/2) + 'px'
-                });
-
-
-                $el.find('.slideshow').cycle($.extend({
-                    slides: '> .slide',
-                    next: '#'+id+' .cycle-next',
-                    log: false,
-                    autoWidth: 0
-                }, settings.cycleOptions));
-
-                if (cycleInitialized && settings.aspectRatio) {
+                $el.on( 'cycle-next', function( event, opts ) {
                     $el.find('.slide img').each(function () {
                         scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
                     });
-                }
-
-
-                cycleInitialized = true;
-            }
-
-            function addDynamicTags () {
-                $el.find('.part-slider-inner .slide.video').each(function () {
-                    var $slide = $(this);
-                    var $overlay = $('<div class="slide-play"><span class="fa-stack fa-4x slide-icon-size"><i class="fa fa-circle fa-stack-2x slide-icon-background"></i><i class="fa fa-play fa-stack-1x slide-icon"></i></span></div>');
-                    $slide.find("a").append($overlay);
                 });
-            }
 
-
-
-            $(window).resize(resizeSlides);
-
-            addDynamicTags();
-
-            resizeSlides();
-
-            $el.on( 'cycle-next', function( event, opts ) {
-                $el.find('.slide img').each(function () {
-                    scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
-                });
+                $(window).resize(resizeSlides);
             });
 
-            if (settings.aspectRatio) {
-                $el.find('.slide img').load(function () {
-                    scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
-                });
-            }
+
+            var playerEvent = function (e) {
+                e.preventDefault();
+                var $a = $(this), $slide = $a.parents('.slide');
+                new Player($el, $slide, $a, settings.playerMaxWidth).play();
+            };
+
+            $el.on('click','.slide a[data-modal]', playerEvent);
+
+
+
 
         });
 

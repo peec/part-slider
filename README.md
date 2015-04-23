@@ -60,6 +60,8 @@ Slider container should have the class `part-slider` to inherit the standard sty
 </div>
 ```
 
+
+
 **Adding image slides that can be opened in a modal.**
 
 ```
@@ -70,8 +72,26 @@ Slider container should have the class `part-slider` to inherit the standard sty
 </div>
 ```
 
+
 - All slides are wrapped in a div with the class `slide`.
 - Notice the `data-modal` on the `a`-tag this tells part-slider to open the href in a modal.
+
+
+**Showing info on the slide (overlay)**
+
+```
+<div class="slide">
+    <a data-modal href="images/1.jpg">
+        <img src="images/1.jpg">
+
+        <div class="info">
+            <p>Hello World!</p>
+        </div>
+    </a>
+</div>
+```
+
+- Add info overlay by using `.info` class.
 
 
 **Adding a youtube video, with thumbnail from the video itself**
