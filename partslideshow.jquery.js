@@ -222,7 +222,7 @@
             visibleSlides: 3,
 
             // Video adapters.
-            videoAdapters: [],
+            videoAdapters: {},
 
             // Cycle options ( see cycle documentation API for available options ).
             cycleOptions: {},

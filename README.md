@@ -193,4 +193,54 @@ $(function () {
 </script>
 ```
 
+#### Adding custom video adapters
 
+You can add video adapters to support more video providers then the built in onces. Adding these are pretty simple.
+
+
+This is an example of how to forexample override the vimeo adapter.
+
+```
+var MyCustomAdapters = {
+    vimeo: {
+        regex: /\/\/(?:www\.)?vimeo.com\/([0-9a-z\-_]+)/i,
+        // Required function.
+        // Should return true if this adapter should be used for the specific video URL. See regex above for example.
+        match: function (url) {
+            return url.match(this.regex);
+        },
+        // Required function.
+        // Task: append <img> tag to $link jqueryObject, based on the "url" of the video.
+        image: function (url, $link) {
+            var video_id = this.videoId(url);
+            $.ajax({
+                type:'GET',
+                url: 'http://vimeo.com/api/v2/video/' + video_id + '.json',
+                jsonp: 'callback',
+                dataType: 'jsonp',
+                success: function(data){
+                    var thumbnail_src = data[0].thumbnail_large;
+                    $link.append($("<img src='"+thumbnail_src+"' />"));
+                }
+            });
+        },
+        // Required function.
+        // Task: Return JQuery Object that consist of an iframe. Should return it based on "url" of the video.
+        embed: function (url) {
+            var video_id = this.videoId(url);
+            return $('<iframe src="//player.vimeo.com/video/'+video_id+'" width="560" height="315" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>');
+        },
+        videoId: function (url) {
+            var matches = this.regex.exec(url);
+            return matches && matches[1];
+        }
+    }
+};
+
+
+// Initialize your slideshow with videoAdapters argument.
+$('.part-slider').partSlideshow({
+    videoAdapters: MyCustomAdapters
+});
+
+```
