@@ -141,6 +141,12 @@
     width: 100%;
 }
 
+.part-slider .part-slider-overlay .part-slider-overlay-inner .info {
+    padding: 5px 10px;
+    background: #000;
+    color: #fff;
+}
+
 .part-slider .part-slider-overlay .part-slider-video-wrapper {
     position: relative;
     width: 100%;
