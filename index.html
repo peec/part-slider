@@ -3,11 +3,20 @@
 <head>
     <title>Part slideshow</title>
     <script src="https://code.jquery.com/jquery-1.11.2.js"></script>
+
+    <!-- Required Cycle2 and Carousel -->
     <script src="http://malsup.github.io/jquery.cycle2.js"></script>
     <script src="http://malsup.github.io/jquery.cycle2.carousel.js"></script>
 
+    <!-- Optional, see part-slider-2 initialization..-->
+    <script src="http://malsup.github.io/jquery.cycle2.swipe.js"></script>
+
+    <!-- Optional, For the next slide icon (can be styled by overriding partslideshow.jquery.css)-->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
+
+
+    <!-- Include Partslideshow -->
     <script src="partslideshow.jquery.js"></script>
     <link rel="stylesheet" href="partslideshow.jquery.css" type="text/css" />
 
@@ -18,7 +27,10 @@
             });
             $('.part-slider-2').partSlideshow({
                 visibleSlides: 2,
-                aspectRatio: 4/3
+                aspectRatio: 4/3,
+                cycleOptions: {
+                    swipe: true // requires the jquery.cycle2.swipe.js plugin.
+                }
             });
         });
     </script>

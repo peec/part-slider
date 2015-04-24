@@ -1,46 +1,5 @@
 (function ( $ ) {
 
-    /**
-     * Default settings.
-     */
-    var defaultSettings = {
-
-        // How many slides to show at the time.
-        visibleSlides: 3,
-
-        // Video adapters.
-        videoAdapters: {},
-
-        // Cycle options ( see cycle documentation API for available options ).
-        cycleOptions: {},
-
-        // How should we crop the images? Examples: 16/9 , 4/3 , 1 etc.
-        // Set to 0 to disable auto crop / zoom effects.
-        aspectRatio: 16/9,
-
-        // Player max width when clicking on images / video thumbnails.
-        // Will be scaled down when in mobile view etc.
-        // Effective when screens are larger then 800 width!
-        playerMaxWidth: 800,
-
-        // Zooms to center if images was cropped, false to disable
-        zoomCenter: true,
-
-        // Kaltura video adapter options. Set the correct partner ID and kalturaPortal name.
-        kaltura: {
-            // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
-            partnerId: '1484431',
-            // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
-            uiconfId: '28551341',
-            // Where are your videos located? This will be used to replace video urls to actual preview images.
-            kalturaPortal: 'https://uia.mediaspace.kaltura.com',
-            // Image url, only change if kaltura changed format of thumbnail API.
-            imageUrl: 'http://www.kaltura.com/p/{partner_id}/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
-            embedArgs: 'iframeembed=true&playerId=kplayer&entry_id={entry_id}&flashvars[streamerType]=auto'
-        }
-    };
-
-
 
     /**
      * Iterator for every slideshow spawned on the page..
@@ -370,6 +329,47 @@
 
 
     $.fn.partSlideshow = function( options ) {
+
+        /**
+         * Default settings.
+         */
+        var defaultSettings = {
+
+            // How many slides to show at the time.
+            visibleSlides: 3,
+
+            // Video adapters.
+            videoAdapters: {},
+
+            // Cycle options ( see cycle documentation API for available options ).
+            cycleOptions: {},
+
+            // How should we crop the images? Examples: 16/9 , 4/3 , 1 etc.
+            // Set to 0 to disable auto crop / zoom effects.
+            aspectRatio: 16/9,
+
+            // Player max width when clicking on images / video thumbnails.
+            // Will be scaled down when in mobile view etc.
+            // Effective when screens are larger then 800 width!
+            playerMaxWidth: 800,
+
+            // Zooms to center if images was cropped, false to disable
+            zoomCenter: true,
+
+            // Kaltura video adapter options. Set the correct partner ID and kalturaPortal name.
+            kaltura: {
+                // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                partnerId: '1484431',
+                // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                uiconfId: '28551341',
+                // Where are your videos located? This will be used to replace video urls to actual preview images.
+                kalturaPortal: 'https://uia.mediaspace.kaltura.com',
+                // Image url, only change if kaltura changed format of thumbnail API.
+                imageUrl: 'http://www.kaltura.com/p/{partner_id}/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
+                embedArgs: 'iframeembed=true&playerId=kplayer&entry_id={entry_id}&flashvars[streamerType]=auto'
+            }
+        };
+
 
         // This is the easiest way to have default options.
         var settings = $.extend(defaultSettings, options);
