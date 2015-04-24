@@ -412,7 +412,7 @@
                         } else {
                             $el.find('.cycle-prev').show();
                         }
-                        if (opts.currSlide+settings.visibleSlides-1  == settings.visibleSlides) {
+                        if (opts.currSlide+settings.visibleSlides > opts.slideCount) {
                             $el.find('.cycle-next').hide();
                         } else {
                             $el.find('.cycle-next').show();
