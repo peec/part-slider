@@ -19,28 +19,39 @@
     width: 100%;
 }
 
-.part-slider-inner .cycle-next {
+.part-slider-inner .cycle-next, .part-slider-inner .cycle-prev{
     color: #fff;
     position: absolute;
     z-index: 9999;
     top: 0;
-    right: 0;
-
-    padding-left: 15px;
-    padding-right: 30px;
-
-
-    background-image: -webkit-gradient(linear, left top, right top, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.45)), color-stop(.1,rgba(0,0,0,0.099)));
-
     height: 100%;
     text-align: center;
-
 }
 
-.part-slider-inner .cycle-next .cycle-next-icon {
+.part-slider-inner .cycle-next {
+    padding-left: 15px;
+    padding-right: 30px;
+    right: 0;
+    background-image: -webkit-gradient(linear, left top, right top, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.45)), color-stop(.1,rgba(0,0,0,0.099)));
+}
+.part-slider-inner .cycle-next:hover {
+    background-image: -webkit-gradient(linear, left top, right top, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.75)), color-stop(.1,rgba(0,0,0,0.099)));
+}
+.part-slider-inner .cycle-prev {
+    display: none;
+    padding-left: 30px;
+    padding-right: 15px;
+    left: 0;
+    background-image: -webkit-gradient(linear, right top, left top, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.45)), color-stop(.1,rgba(0,0,0,0.099)));
+    text-align: right;
+}
+.part-slider-inner .cycle-prev:hover {
+    background-image: -webkit-gradient(linear, right top, left top, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.75)), color-stop(.1,rgba(0,0,0,0.099)));
+}
+
+.part-slider-inner .cycle-next .cycle-next-icon, .part-slider-inner .cycle-prev .cycle-prev-icon{
     position: absolute;
     top: 50%;
-    left: 15px;
     font-size: 60px;
     margin-top: -15px;
     font-family: FontAwesome;
@@ -49,12 +60,26 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-.part-slider-inner .cycle-next .cycle-next-icon:focus {
+
+.part-slider-inner .cycle-next .cycle-next-icon {
+    left: 15px;
+}
+
+.part-slider-inner .cycle-prev .cycle-prev-icon {
+    right: 15px;
+}
+.part-slider-inner .cycle-next:focus, .part-slider-inner .cycle-prev:focus {
     outline: 0;
 }
+
 .part-slider-inner .cycle-next .cycle-next-icon:before {
     content: "\f105";
 }
+
+.part-slider-inner .cycle-prev .cycle-prev-icon:before {
+    content: "\f104";
+}
+
 
 .part-slider .slide {
     overflow: hidden;

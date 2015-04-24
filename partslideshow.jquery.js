@@ -6,6 +6,7 @@
      */
     var slideshowIterator = 0;
 
+    var Instances = {};
 
     /**
      * Built in Video Adapters to allow embeding videos as slides.
@@ -325,10 +326,215 @@
 
 
 
+    var Slideshow = (function () {
 
+
+        function prepareDOM ($el) {
+            // Wrap object in some more appropriate divs.
+            var $cycleWrapper = $('<div class="part-slider-container">'+
+                '<div class="part-slider-inner">'+
+                '<div class="slideshow" data-cycle-fx=carousel data-cycle-timeout=0 data-cycle-carousel-visible=1>'+
+                '</div>'+
+                '<a href="#" class="cycle-prev"><span class="cycle-prev-icon"></span></a>' +
+                '<a href="#" class="cycle-next"><span class="cycle-next-icon"></span></a>' +
+                '</div></div>');
+            $cycleWrapper.find('.slideshow').html($el.clone(false).html());
+            $el.empty();
+
+
+            $cycleWrapper.find('.part-slider-inner .slide.video').each(function () {
+                var $slide = $(this);
+                var $overlay = $('<div class="slide-play"><span class="fa-stack fa-4x slide-icon-size"><i class="fa fa-circle fa-stack-2x slide-icon-background"></i><i class="fa fa-play fa-stack-1x slide-icon"></i></span></div>');
+                $slide.find("a").append($overlay);
+            });
+
+            return $cycleWrapper;
+        }
+
+        function requestThumbnails ($cycleWrapper) {
+            var thumbnailPromises = [];
+            // Video embed
+            // Preprocess slides
+            $cycleWrapper.find('.slide').each(function () {
+                var $slide = $(this),
+                    $links = $slide.find('a');
+
+                if ($links.length) {
+                    $links.each(function () {
+                        var $link = $(this);
+                        $.each(_videoAdapters, function (index, item) {
+                            var url = $link.attr('href');
+                            if (item.match(url)) {
+                                var $image = $link.find('img');
+                                if (!$image.length) {
+                                    thumbnailPromises.push(item.image(url, $link));
+                                }
+                            }
+                        });
+
+                    });
+                }
+            });
+            return thumbnailPromises;
+        }
+
+
+        function getCopy ($el) {
+            return $($('body').find('.part-slider-hidden[data-belongto="'+$el.attr('id')+'"]').html());
+        }
+
+        return function ($el, settings) {
+
+            var that = this;
+
+            var id = "part-slider-" + slideshowIterator,
+                cycleInitialized = false,
+                shouldHaveHeight = 0,
+                shouldHaveWidth = 0,
+                copy;
+
+            var Events = {
+                playerEvent: function (e) {
+                    e.preventDefault();
+                    var $a = $(this), $slide = $a.parents('.slide');
+                    new Player($el, $slide, $a, settings.playerMaxWidth).play();
+                },
+                cycleScaleImages: function( event, opts ) {
+                    $el.find('.slide img').each(function () {
+                        scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
+                    });
+                },
+                cycleNext: function (event, opts) {
+                    if (opts.carouselVisible && !opts.allowWrap) {
+
+                        if (opts.currSlide == 0) {
+                            $el.find('.cycle-prev').hide();
+                        } else {
+                            $el.find('.cycle-prev').show();
+                        }
+                        if (opts.currSlide+settings.visibleSlides-1  == settings.visibleSlides) {
+                            $el.find('.cycle-next').hide();
+                        } else {
+                            $el.find('.cycle-next').show();
+                        }
+                    } else {
+                        $el.find('.cycle-prev').show();
+                    }
+                },
+                resizeSlides:  function (triggerEvent) {
+
+                    // Free up mem.
+                    if ($el.find('.slideshow').length) {
+                        $el.find('.slideshow').cycle('destroy');
+                    }
+
+                    $el.html(copy.clone(false));
+
+                    // When image sare loaded, scale them and crop.
+                    if (settings.aspectRatio) {
+                        $el.find('.slide img').load(function () {
+                            scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
+                        });
+                    }
+
+                    // Find out what width per slide.
+                    shouldHaveWidth = $el.find('.part-slider-container').outerWidth(true) / settings.visibleSlides;
+
+                    var css = {
+                        width: shouldHaveWidth + 'px'
+                    };
+
+                    if (settings.aspectRatio) {
+                        shouldHaveHeight = shouldHaveWidth / settings.aspectRatio;
+                        css['height'] = parseInt(shouldHaveHeight, 10) + 'px';
+                    }
+
+                    // Lets find all the slides.
+                    var $slides = $el.find('.part-slider-inner .slide');
+
+                    // Set fixed width / heights on each slide. They should all have equal heights.
+                    $slides.css(css);
+
+                    // Align play icon on vids.
+                    $el.find('.part-slider-inner .slide-play').css({
+                        'margin-top': - ($el.find('.part-slider-inner .slide.video .slide-play').height()/2) + 'px'
+                    });
+
+                    // Init CYCLE
+                    $el.find('.slideshow').cycle($.extend({
+                        slides: '> .slide',
+                        next: '#'+id+' .cycle-next',
+                        prev: '#'+id+' .cycle-prev',
+                        log: false,
+                        autoWidth: 0
+                    }, settings.cycleOptions));
+
+                    // If cycle was initied, scale images.
+                    if (cycleInitialized && settings.aspectRatio) {
+                        $el.find('.slide img').each(function () {
+                            scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
+                        });
+                    }
+
+                    // Yes its now done.
+                    cycleInitialized = true;
+
+                    if (triggerEvent != "notrigger") {
+                        $el.trigger('part-slider:refresh');
+                    }
+                },
+                bind: function () {
+                    // Listen on events.
+                    $el.on( 'cycle-next', Events.cycleScaleImages);
+                    $el.on( 'cycle-next', Events.cycleNext);
+                    $el.on( 'cycle-prev', Events.cycleNext);
+                    $el.on( 'cycle-prev', Events.cycleScaleImages);
+                    $(window).resize(Events.resizeSlides);
+                    $el.on('click','.slide a[data-modal]', Events.playerEvent);
+                }
+            };
+
+
+            return {
+                start: function  () {
+                    $el.prop('id', "part-slider-" + slideshowIterator);
+
+                    var $cycleWrapper = prepareDOM($el);
+                    var thumbnailPromises = requestThumbnails($cycleWrapper);
+
+                    $.when.apply($,thumbnailPromises).then(function () {
+                        copy = $cycleWrapper.clone(false);
+                        Events.resizeSlides();
+                        // Triger custom event.
+                        $el.trigger('part-slider:initialized');
+                    });
+                    Events.bind();
+                },
+                refresh: function  () {
+                    Events.resizeSlides("notrigger");
+                },
+                stop: function () {
+                    // todo
+                    // hardly necessary but could be..
+                }
+            };
+        };
+    })();
 
 
     $.fn.partSlideshow = function( options ) {
+
+        if (typeof options === "string") {
+            // Run command.
+            switch(options) {
+                case "refresh":
+                    return this.each(function () {
+                        var $el = $(this);
+                        Instances[$el.attr('id')].refresh();
+                    });
+                    break;
+            }
+        }
 
         /**
          * Default settings.
@@ -385,146 +591,14 @@
         });
 
 
-        this.each(function () {
+
+        return this.each(function () {
             slideshowIterator++;
             var $el = $(this);
-
-            var id = "part-slider-" + slideshowIterator,
-                cycleInitialized = false,
-                shouldHaveHeight = 0,
-                shouldHaveWidth = 0;
-
-            $el.prop('id', id);
-
-            // Wrap object in some more appropriate divs.
-            var $cycleWrapper = $('<div class="part-slider-container">'+
-                '<div class="part-slider-inner">'+
-                '<div class="slideshow" data-cycle-fx=carousel data-cycle-timeout=0 data-cycle-carousel-visible=1>'+
-                '</div>'+
-                '<a href="#" class="cycle-next"><span class="cycle-next-icon"></span></a>' +
-                '</div></div>');
-            $cycleWrapper.find('.slideshow').html($el.clone(false).html());
-            $el.empty();
-
-
-            $cycleWrapper.find('.part-slider-inner .slide.video').each(function () {
-                var $slide = $(this);
-                var $overlay = $('<div class="slide-play"><span class="fa-stack fa-4x slide-icon-size"><i class="fa fa-circle fa-stack-2x slide-icon-background"></i><i class="fa fa-play fa-stack-1x slide-icon"></i></span></div>');
-                $slide.find("a").append($overlay);
-            });
-
-            var thumbnailPromises = [];
-            // Video embed
-            // Preprocess slides
-            $cycleWrapper.find('.slide').each(function () {
-                var $slide = $(this),
-                    $links = $slide.find('a');
-
-                if ($links.length) {
-                    $links.each(function () {
-                        var $link = $(this);
-                        $.each(_videoAdapters, function (index, item) {
-                            var url = $link.attr('href');
-                            if (item.match(url)) {
-                                var $image = $link.find('img');
-                                if (!$image.length) {
-                                    thumbnailPromises.push(item.image(url, $link));
-                                }
-                            }
-                        });
-
-                    });
-                }
-            });
-
-
-
-            $.when.apply($,thumbnailPromises).then(function() {
-
-                var copy = $cycleWrapper.clone(false);
-
-                // For responsiveness.
-                function resizeSlides () {
-
-                    // Free up mem.
-                    if ($el.find('.slideshow').length) {
-                        $el.find('.slideshow').cycle('destroy');
-                    }
-
-                    $el.html(copy.clone(false));
-
-                    if (settings.aspectRatio) {
-                        $el.find('.slide img').load(function () {
-                            scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
-                        });
-                    }
-
-
-                    shouldHaveWidth = $el.find('.part-slider-container').outerWidth(true) / settings.visibleSlides;
-
-                    var css = {
-                        width: shouldHaveWidth + 'px'
-                    };
-
-                    if (settings.aspectRatio) {
-                        shouldHaveHeight = shouldHaveWidth / settings.aspectRatio;
-                        css['height'] = parseInt(shouldHaveHeight, 10) + 'px';
-                    }
-
-                    var $slides = $el.find('.part-slider-inner .slide');
-                    $slides.css(css);
-
-                    $el.find('.part-slider-inner .slide-play').css({
-                        'margin-top': - ($el.find('.part-slider-inner .slide.video .slide-play').height()/2) + 'px'
-                    });
-
-
-                    $el.find('.slideshow').cycle($.extend({
-                        slides: '> .slide',
-                        next: '#'+id+' .cycle-next',
-                        log: false,
-                        autoWidth: 0
-                    }, settings.cycleOptions));
-
-                    if (cycleInitialized && settings.aspectRatio) {
-                        $el.find('.slide img').each(function () {
-                            scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
-                        });
-                    }
-
-
-                    cycleInitialized = true;
-
-                    $el.trigger('part-slider:initialized');
-
-                }
-
-                resizeSlides();
-
-                $el.on( 'cycle-next', function( event, opts ) {
-                    $el.find('.slide img').each(function () {
-                        scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
-                    });
-                });
-
-                $(window).resize(resizeSlides);
-            });
-
-
-            var playerEvent = function (e) {
-                e.preventDefault();
-                var $a = $(this), $slide = $a.parents('.slide');
-                new Player($el, $slide, $a, settings.playerMaxWidth).play();
-            };
-
-            $el.on('click','.slide a[data-modal]', playerEvent);
-
-
-
-
+            var obj = new Slideshow($el, settings);
+            obj.start();
+            Instances[$el.attr('id')] = obj;
         });
-
-
     };
 
 }( jQuery ));
