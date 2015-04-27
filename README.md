@@ -264,3 +264,24 @@ $('.part-slider').partSlideshow({
 });
 
 ```
+
+
+#### Responsive slide elements
+
+Add custom size adapters to customize how many visible slides it should be per screen width.
+
+```
+
+<script>
+    $(function () {
+        $('.part-slider').partSlideshow({
+            visibleSlides: 3, // How many slides to show in slider..
+            // Adapters overrides visibleSlides if match is true.
+            visibleSlidesAdapters: [
+                {match: function(screenWidth){ return screenWidth < 620 && w screenWidth 300; }, slides: 1}
+            ]
+        });
+    });
+</script>
+
+```

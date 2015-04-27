@@ -391,7 +391,8 @@
                 cycleInitialized = false,
                 shouldHaveHeight = 0,
                 shouldHaveWidth = 0,
-                copy;
+                copy,
+                visibleSlides = settings.visibleSlides;
 
             var Events = {
                 playerEvent: function (e) {
@@ -405,6 +406,8 @@
                     });
                 },
                 cycleNext: function (event, opts) {
+                    // console.log(opts.slideCount + " - " + opts.nextSlide);
+                    // console.log(opts.currSlide+visibleSlides);
                     if (opts.carouselVisible && !opts.allowWrap) {
 
                         if (opts.currSlide == 0) {
@@ -412,7 +415,7 @@
                         } else {
                             $el.find('.cycle-prev').show();
                         }
-                        if (opts.currSlide+settings.visibleSlides > opts.slideCount) {
+                        if (opts.currSlide+visibleSlides > opts.slideCount) {
                             $el.find('.cycle-next').hide();
                         } else {
                             $el.find('.cycle-next').show();
@@ -426,7 +429,7 @@
                     // Free up mem.
                     if ($el.find('.slideshow').length) {
                         $el.find('.slideshow').cycle('destroy');
-                    }
+                    }   
 
                     $el.html(copy.clone(false));
 
@@ -437,8 +440,19 @@
                         });
                     }
 
+
+                    visibleSlides = settings.visibleSlides;
+                    // Calc visible slides adapter..
+                    $.each(settings.visibleSlidesAdapters, function (index, adapter) {
+                        if (adapter.match($(window).width())) {
+                            visibleSlides = adapter.slides;
+                        }
+                    })
+
+
+
                     // Find out what width per slide.
-                    shouldHaveWidth = $el.find('.part-slider-container').outerWidth(true) / settings.visibleSlides;
+                    shouldHaveWidth = $el.find('.part-slider-container').outerWidth(true) / visibleSlides;
 
                     var css = {
                         width: shouldHaveWidth + 'px'
@@ -461,13 +475,22 @@
                     });
 
                     // Init CYCLE
-                    $el.find('.slideshow').cycle($.extend({
+                    var cycleOpts = $.extend({
                         slides: '> .slide',
                         next: '#'+id+' .cycle-next',
                         prev: '#'+id+' .cycle-prev',
                         log: false,
                         autoWidth: 0
-                    }, settings.cycleOptions));
+                    }, settings.cycleOptions);
+
+                    if (!settings.rotate) {
+                        cycleOpts = $.extend(cycleOpts, {
+                            allowWrap: false,
+                            carouselVisible: visibleSlides - 1
+                        })
+                    }
+
+                    $el.find('.slideshow').cycle(cycleOpts);
 
                     // If cycle was initied, scale images.
                     if (cycleInitialized && settings.aspectRatio) {
@@ -543,6 +566,14 @@
 
             // How many slides to show at the time.
             visibleSlides: 3,
+
+
+            // Responsive adapters for visible slide amount,
+            // Example to add to this array: {match: function(w){ return w < 620 && w > 300; }, slides: 1}
+            visibleSlidesAdapters: [],
+
+            // rotate slides, when end of slide start on new when next button is clicked.
+            rotate: true,
 
             // Video adapters.
             videoAdapters: {},
