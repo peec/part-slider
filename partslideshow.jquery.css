@@ -112,15 +112,16 @@
     width: 100%;
 }
 .part-slider .slide .info p {
-    background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.65)), color-stop(.1,rgba(0,0,0,0.001)));
+    background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(100,100,100,0.0)), to(rgba(50,50,50,0.55)), color-stop(.0,rgba(0,0,0,0.001)));
     color: #EFEFEF;
-    padding: 15px 0 10px 15px;
+    padding: 25px 0 10px 15px;
     margin: 0;
     white-space: normal;
 }
 
 .part-slider-inner .slide {
     position: relative !important;
+    margin-right: 10px;
 }
 .part-slider-inner .slide.video .slide-play {
     position:absolute;
@@ -130,33 +131,55 @@
     text-align: center;
     z-index: 10000;
 }
-.part-slider-inner .slide.video .slide-play .slide-icon-background {
-    color: #fff;
-    opacity: 0.4;
-}
-.part-slider-inner .slide.video a:hover .slide-play .slide-icon-background {
-    opacity: 1;
+
+.part-slider-inner .slide.video .slide-play .slide-icon-size {
+    width: 75px;
+    height: 75px;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    color: #666;
+
+    font-size: 25px;
+    background-color: rgba(50, 50, 50, 0.5);
+    border: 3px solid #fff;
+
+    border-radius: 50%;
+    box-shadow: 0 3px 2px rgba(0, 0, 0, 0.3);
+
+    display: table;
 }
 
 .part-slider-inner .slide.video .slide-play .slide-icon {
-    color: #c60c30;
-    margin-left: 5px;
+    display: table-cell;
+    vertical-align: middle;
+
+    color: #fff;
+
+    font-family: FontAwesome;
+    font-style: normal;
+    font-weight: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    font-size: 1.2em;
+}
+
+.part-slider-inner .slide.video .slide-play .slide-icon:before {
+    content: "\f04b";
 }
 
 
 @media(max-width: 420px) {
     .part-slider-inner .slide-icon-size {
-        font-size: 1.7em;
-    }
-    .part-slider-inner .slide.video .slide-play .slide-icon {
-        margin-left: 3px;
+        font-size: 0.9em;
     }
 }
 
 
 @media (min-width: 420px) and (max-width: 768px) {
     .part-slider-inner .slide-icon-size {
-        font-size: 2.5em;
+        font-size: 0.9em;
     }
 }
 

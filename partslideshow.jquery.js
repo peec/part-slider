@@ -344,7 +344,10 @@
 
             $cycleWrapper.find('.part-slider-inner .slide.video').each(function () {
                 var $slide = $(this);
-                var $overlay = $('<div class="slide-play"><span class="fa-stack fa-4x slide-icon-size"><i class="fa fa-circle fa-stack-2x slide-icon-background"></i><i class="fa fa-play fa-stack-1x slide-icon"></i></span></div>');
+                var $overlay = $('<div class="slide-play">' +
+                    '<span class="slide-icon-size">' +
+                    '<i class="slide-icon"></i>' +
+                    '</span></div>');
                 $slide.find("a").append($overlay);
             });
 
