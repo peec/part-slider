@@ -61,6 +61,25 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+
+
+/* MEDIUM SIZE */
+
+@media (max-width: 800px)
+{
+    .part-slider-inner .cycle-next {
+        padding-right: 25px;
+        padding-left: 10px;
+    }
+    .part-slider-inner .cycle-prev {
+        padding-left: 25px;
+        padding-right: 0px;
+    }
+    .part-slider-inner .cycle-next .cycle-next-icon, .part-slider-inner .cycle-prev .cycle-prev-icon{
+        font-size: 40px;
+    }
+}
+
 .part-slider-inner .cycle-next .cycle-next-icon {
     left: 15px;
 }
