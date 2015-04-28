@@ -1,0 +1,27 @@
+{
+  "name": "partslider",
+  "title": "Partslider",
+  "description": "Part slider, advanced responsive slideshow based on jQuery.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/peec/part-slider",
+  "author": {
+    "name": "Petter Kjelkenes",
+    "email": "kjelkenes@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:peec/part-slider.git"
+  },
+  "bugs": "https://github.com/peec/part-slider/issues",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/peec/part-slider/blob/master/LICENSE-MIT"
+    }
+  ],
+  "dependencies": {
+    "jquery": ">=1.1",
+    "cycle": ">=2.1"
+  },
+  "keywords": []
+}

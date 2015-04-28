@@ -1,3 +1,6 @@
+/*! Partslider - v0.1.0 - 2015-04-28
+* https://github.com/peec/part-slider
+* Copyright (c) 2015 Petter Kjelkenes; Licensed MIT */
 (function ( $ ) {
 
 
@@ -24,7 +27,7 @@
             videoId: function (url) {
                 var video_id = url.split('v=')[1];
                 var ampersandPosition = video_id.indexOf('&');
-                if(ampersandPosition != -1) {
+                if(ampersandPosition !== -1) {
                     video_id = video_id.substring(0, ampersandPosition);
                 }
                 return video_id;
@@ -124,7 +127,7 @@
      */
     function scaleImg($img, shouldHaveWidth, shouldHaveHeight, zoomCenter) {
 
-        var h = $img.height(), w = $img.width();
+        var h = $img.height(), w = $img.width(), diff;
         var aspect = $img[0].naturalWidth / $img[0].naturalHeight; // IE8+.
         if (h < shouldHaveHeight) {
             while(h < shouldHaveHeight) {
@@ -136,12 +139,12 @@
 
         if (zoomCenter) {
             if ($img.height() > shouldHaveHeight) {
-                var diff = -($img.height() - shouldHaveHeight);
+                diff = -($img.height() - shouldHaveHeight);
                 $img.css({'margin-top': (diff/2)+'px'});
             }
 
             if ($img.width() > shouldHaveWidth) {
-                var diff = -($img.width() - shouldHaveWidth);
+                diff = -($img.width() - shouldHaveWidth);
                 $img.css({'margin-left': (diff/2)+'px'});
             }
         }
@@ -183,7 +186,9 @@
                 }
 
                 if (!that.$slide.data('videoadapter')) {
-                    console.error("No video adapter was assigned to slide (empty adapter in data attribute).");
+                    if (console) {
+                        console.log("No video adapter was assigned to slide (empty adapter in data attribute).");
+                    }
                     return;
                 }
                 if (typeof _videoAdapters[that.$slide.data('videoadapter')].embed === 'undefined') {
@@ -238,7 +243,7 @@
                     }
                 },
                 closeEvent: function(e) {
-                    if (e.keyCode == 27) {
+                    if (e.keyCode === 27) {
                         requestClose();
                     }
                 },
@@ -385,7 +390,6 @@
 
         return function ($el, settings) {
 
-            var that = this;
 
             var id = "part-slider-" + slideshowIterator,
                 cycleInitialized = false,
@@ -400,7 +404,7 @@
                     var $a = $(this), $slide = $a.parents('.slide');
                     new Player($el, $slide, $a, settings.playerMaxWidth).play();
                 },
-                cycleScaleImages: function( event, opts ) {
+                cycleScaleImages: function( ) {
                     $el.find('.slide img').each(function () {
                         scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
                     });
@@ -410,7 +414,7 @@
                     // console.log(opts.currSlide+visibleSlides);
                     if (opts.carouselVisible && !opts.allowWrap) {
 
-                        if (opts.currSlide == 0) {
+                        if (opts.currSlide === 0) {
                             $el.find('.cycle-prev').hide();
                         } else {
                             $el.find('.cycle-prev').show();
@@ -483,7 +487,7 @@
                         cycleOpts = $.extend(cycleOpts, {
                             allowWrap: false,
                             carouselVisible: visibleSlides - 1
-                        })
+                        });
                     }
 
                     $el.find('.slideshow').cycle(cycleOpts);
@@ -506,7 +510,7 @@
                         });
                     }
 
-                    if (triggerEvent != "notrigger") {
+                    if (triggerEvent !== "notrigger") {
                         $el.trigger('part-slider:refresh');
                     }
                 },

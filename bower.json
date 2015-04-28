@@ -1,0 +1,28 @@
+{
+  "name": "jquery-partslider",
+  "version": "0.0.1",
+  "homepage": "https://github.com/peec/part-slider",
+  "authors": [
+    "Petter Kjelkenes <kjelkenes@gmail.com>"
+  ],
+  "description": "Advanced slideshow based on jQuery and Cycle2",
+  "main": "build/jquery.partslider.js",
+  "keywords": [
+    "slideshow",
+    "carousel",
+    "jquery",
+    "cycle2",
+    "partslider"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery-cycle2": ">=2.1"
+  }
+}

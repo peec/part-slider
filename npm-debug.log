@@ -1,0 +1,90 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node',
+1 verbose cli   '/usr/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   'jquery-cycle2',
+1 verbose cli   '--save' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.32
+4 verbose node symlink /usr/bin/node
+5 warn package.json jquery-partslider@0.0.1 No repository field.
+6 verbose readDependencies using package.json deps
+7 verbose cache add [ 'jquery-cycle2', null ]
+8 verbose cache add name=undefined spec="jquery-cycle2" args=["jquery-cycle2",null]
+9 verbose parsed url { protocol: null,
+9 verbose parsed url   slashes: null,
+9 verbose parsed url   auth: null,
+9 verbose parsed url   host: null,
+9 verbose parsed url   port: null,
+9 verbose parsed url   hostname: null,
+9 verbose parsed url   hash: null,
+9 verbose parsed url   search: null,
+9 verbose parsed url   query: null,
+9 verbose parsed url   pathname: 'jquery-cycle2',
+9 verbose parsed url   path: 'jquery-cycle2',
+9 verbose parsed url   href: 'jquery-cycle2' }
+10 silly lockFile a1ea185e-jquery-cycle2 jquery-cycle2
+11 verbose lock jquery-cycle2 /home/pk/.npm/a1ea185e-jquery-cycle2.lock
+12 silly lockFile a1ea185e-jquery-cycle2 jquery-cycle2
+13 silly lockFile a1ea185e-jquery-cycle2 jquery-cycle2
+14 verbose addNamed [ 'jquery-cycle2', '' ]
+15 verbose addNamed [ null, '*' ]
+16 silly lockFile c40fb7b2-jquery-cycle2 jquery-cycle2@
+17 verbose lock jquery-cycle2@ /home/pk/.npm/c40fb7b2-jquery-cycle2.lock
+18 silly addNameRange { name: 'jquery-cycle2', range: '*', hasData: false }
+19 verbose request where is /jquery-cycle2
+20 verbose request registry https://registry.npmjs.org/
+21 verbose request id 3baa0849ea9748e0
+22 verbose url raw /jquery-cycle2
+23 verbose url resolving [ 'https://registry.npmjs.org/', './jquery-cycle2' ]
+24 verbose url resolved https://registry.npmjs.org/jquery-cycle2
+25 verbose request where is https://registry.npmjs.org/jquery-cycle2
+26 info trying registry request attempt 1 at 17:07:09
+27 http GET https://registry.npmjs.org/jquery-cycle2
+28 http 404 https://registry.npmjs.org/jquery-cycle2
+29 verbose headers { date: 'Tue, 28 Apr 2015 15:07:09 GMT',
+29 verbose headers   server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+29 verbose headers   'content-type': 'application/json',
+29 verbose headers   'cache-control': 'max-age=0',
+29 verbose headers   'content-length': '51',
+29 verbose headers   'accept-ranges': 'bytes',
+29 verbose headers   via: '1.1 varnish',
+29 verbose headers   age: '0',
+29 verbose headers   'x-served-by': 'cache-fra1248-FRA',
+29 verbose headers   'x-cache': 'MISS',
+29 verbose headers   'x-cache-hits': '0',
+29 verbose headers   'x-timer': 'S1430233629.711040,VS0,VE176',
+29 verbose headers   'keep-alive': 'timeout=10, max=50',
+29 verbose headers   connection: 'Keep-Alive' }
+30 silly registry.get cb [ 404,
+30 silly registry.get   { date: 'Tue, 28 Apr 2015 15:07:09 GMT',
+30 silly registry.get     server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+30 silly registry.get     'content-type': 'application/json',
+30 silly registry.get     'cache-control': 'max-age=0',
+30 silly registry.get     'content-length': '51',
+30 silly registry.get     'accept-ranges': 'bytes',
+30 silly registry.get     via: '1.1 varnish',
+30 silly registry.get     age: '0',
+30 silly registry.get     'x-served-by': 'cache-fra1248-FRA',
+30 silly registry.get     'x-cache': 'MISS',
+30 silly registry.get     'x-cache-hits': '0',
+30 silly registry.get     'x-timer': 'S1430233629.711040,VS0,VE176',
+30 silly registry.get     'keep-alive': 'timeout=10, max=50',
+30 silly registry.get     connection: 'Keep-Alive' } ]
+31 silly lockFile c40fb7b2-jquery-cycle2 jquery-cycle2@
+32 silly lockFile c40fb7b2-jquery-cycle2 jquery-cycle2@
+33 error 404 404 Not Found: jquery-cycle2
+33 error 404
+33 error 404 'jquery-cycle2' is not in the npm registry.
+33 error 404 You should bug the author to publish it
+33 error 404 It was specified as a dependency of 'jquery-partslider'
+33 error 404
+33 error 404 Note that you can also install from a
+33 error 404 tarball, folder, or http url, or git url.
+34 error System Linux 3.13.0-45-generic
+35 error command "/usr/bin/node" "/usr/bin/npm" "install" "jquery-cycle2" "--save"
+36 error cwd /home/www-data/no/grenlandweb/dev2/pk/partslider
+37 error node -v v0.10.32
+38 error npm -v 1.4.28
+39 error code E404
+40 verbose exit [ 1, true ]
