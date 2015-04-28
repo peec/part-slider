@@ -41,10 +41,6 @@
     background-image: -webkit-gradient(linear, left top, right top, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.45)), color-stop(.1,rgba(0,0,0,0.099)));
 }
 
-.part-slider-inner .cycle-next:hover {
-    background-image: -webkit-gradient(linear, left top, right top, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.75)), color-stop(.1,rgba(0,0,0,0.099)));
-}
-
 .part-slider-inner .cycle-prev {
     display: none;
     padding-left: 30px;
@@ -54,9 +50,6 @@
     text-align: right;
 }
 
-.part-slider-inner .cycle-prev:hover {
-    background-image: -webkit-gradient(linear, right top, left top, from(rgba(0,0,0,0.001)), to(rgba(0,0,0,0.75)), color-stop(.1,rgba(0,0,0,0.099)));
-}
 
 .part-slider-inner .cycle-next .cycle-next-icon, .part-slider-inner .cycle-prev .cycle-prev-icon{
     position: absolute;
