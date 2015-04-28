@@ -382,9 +382,6 @@
         }
 
 
-        function getCopy ($el) {
-            return $($('body').find('.part-slider-hidden[data-belongto="'+$el.attr('id')+'"]').html());
-        }
 
         return function ($el, settings) {
 
@@ -551,15 +548,21 @@
     $.fn.partSlideshow = function( options ) {
 
         if (typeof options === "string") {
-            // Run command.
-            switch(options) {
-                case "refresh":
-                    return this.each(function () {
-                        var $el = $(this);
-                        Instances[$el.attr('id')].refresh();
-                    });
-                    break;
-            }
+            return this.each(function () {
+                var $el = $(this), id = $el.attr('id');
+
+                if (typeof Instances[id] === 'undefined') {
+                    console.error("partSlideshow was not initialized, must be initialized before '" + options + "' is used.");
+                    return;
+                }
+
+                // Run command.
+                switch(options) {
+                    case "refresh":
+                        Instances[id].refresh();
+                        break;
+                }
+            });
         }
 
         /**
