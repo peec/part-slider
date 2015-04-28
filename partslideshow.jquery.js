@@ -433,23 +433,19 @@
 
                     $el.html(copy.clone(false));
 
-                    // When image sare loaded, scale them and crop.
-                    if (settings.aspectRatio) {
-                        $el.find('.slide img').load(function () {
-                            scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
-                        });
-                    }
-
-
                     visibleSlides = settings.visibleSlides;
                     // Calc visible slides adapter..
                     $.each(settings.visibleSlidesAdapters, function (index, adapter) {
                         if (adapter.match($(window).width())) {
                             visibleSlides = adapter.slides;
                         }
-                    })
+                    });
 
-
+                    // Set width on the containeroverflow unit.
+                    if (settings.teaserSlidePercent) {
+                        var containerOverflowWidth = ($el.width() + (($el.width() / visibleSlides) * (settings.teaserSlidePercent / 100)));
+                        $el.find('.part-slider-container').css({width: containerOverflowWidth + "px"});
+                    }
 
                     // Find out what width per slide.
                     shouldHaveWidth = $el.find('.part-slider-container').outerWidth(true) / visibleSlides;
@@ -501,6 +497,14 @@
 
                     // Yes its now done.
                     cycleInitialized = true;
+
+
+                    // When images are loaded, scale them and crop.
+                    if (settings.aspectRatio) {
+                        $el.find('.slide img').load(function () {
+                            scaleImg($(this), shouldHaveWidth, shouldHaveHeight, settings.zoomCenter);
+                        });
+                    }
 
                     if (triggerEvent != "notrigger") {
                         $el.trigger('part-slider:refresh');
@@ -577,6 +581,10 @@
             // Responsive adapters for visible slide amount,
             // Example to add to this array: {match: function(w){ return w < 620 && w > 300; }, slides: 1}
             visibleSlidesAdapters: [],
+
+            // Makes the last of the visible slides in viewport to be partly shown.
+            // Teaser effect to make users click next to see the full image / slide / video.
+            teaserSlidePercent: 50,
 
             // rotate slides, when end of slide start on new when next button is clicked.
             rotate: true,

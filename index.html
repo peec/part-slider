@@ -23,14 +23,20 @@
     <script>
         $(function () {
             $('.part-slider-1').partSlideshow({
-                visibleSlides: 3
+                visibleSlides: 3,
+                visibleSlidesAdapters: [
+                    // Show 2 for mobile, 3 is a bit to much.
+                    {match: function(screenWidth){ return screenWidth < 620; }, slides: 2}
+                ]
             });
             $('.part-slider-2').partSlideshow({
                 visibleSlides: 2,
                 aspectRatio: 4/3,
                 cycleOptions: {
                     swipe: true // requires the jquery.cycle2.swipe.js plugin.
-                }
+                },
+                rotate: false,
+                teaserSlidePercent: 70
             });
         });
     </script>
