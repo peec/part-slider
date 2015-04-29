@@ -36,33 +36,39 @@ You may take a look (by default)?: See [This screenshot](https://raw.github.com/
 
 - JQuery
 - Cycle2
-- Font-awesome for the next / prev arrows. ( not required ).
+- Font-awesome
 
 
 ### INSTALLATION:
 
-Install via bower:
+**Install via bower:**
 
 ```
 bower install jquery-partslider
 ```
 
+Include libraries in your HTML head section:
+
+```html
+    <script src="../bower_components/jQuery/dist/jquery.min.js"></script>
+    <script src="../bower_components/jquery-cycle2/build/jquery.cycle2.js"></script>
+    <script src="../bower_components/jquery-cycle2/build/plugin/jquery.cycle2.carousel.min.js"></script>
+    <script src="../bower_components/jquery-cycle2/build/plugin/jquery.cycle2.swipe.min.js"></script>
+    <link rel="stylesheet" href="../bower_components/components-font-awesome/css/font-awesome.min.css">
+    <script src="../dist/jquery.partslider.js"></script>
+    <link rel="stylesheet" href="../dist/jquery.partslider.css" type="text/css" />
 ```
 
-```
 
-
-Install manually:
+**Install manually:**
 
 1. Download this repository via git or zip.
 1. Include jQuery and Cycle2 + Cycle2 Carousel plugin .
 1. Include dist/jquery.partslider.min.css and dist/jquery.partslider.min.js.
 
 
+
 ## DOCUMENTATION
-
-### Including the library
-
 
 
 ### The HTML
