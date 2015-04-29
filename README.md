@@ -1,5 +1,8 @@
 # Part Slider
 
+[![Build Status](https://travis-ci.org/peec/part-slider.png?branch=master)](https://travis-ci.org/peec/part-slider)
+
+
 A slideshow plugin for jQuery, minimal effort to get it working.
 
 **Why is it named Part Slider**
