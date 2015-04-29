@@ -1,20 +1,122 @@
-/*! Partslider - v0.1.0 - 2015-04-28
+/*! Partslider - v0.1.0 - 2015-04-29
 * https://github.com/peec/part-slider
 * Copyright (c) 2015 Petter Kjelkenes; Licensed MIT */
+
 (function ( $ ) {
+    'use strict';
+
+    var slideshowIterator = 0,
+
+        /**
+         * Holds instances of $.fn.partSlideshow.Slideshow, where key is the elements ID.
+         * Makes it possible to run commands on the instance.
+         * @type {{}}
+         */
+        Instances = {};
 
 
-    /**
-     * Iterator for every slideshow spawned on the page..
-     */
-    var slideshowIterator = 0;
 
-    var Instances = {};
+    $.fn.partSlideshow = function( options ) {
 
-    /**
-     * Built in Video Adapters to allow embeding videos as slides.
-     */
-    var _videoAdapters = {
+        if (typeof options === "string") {
+            return this.each(function () {
+                var $el = $(this), id = $el.attr('id');
+
+                if (typeof Instances[id] === 'undefined') {
+                    console.error("partSlideshow was not initialized, must be initialized before '" + options + "' is used.");
+                    return;
+                }
+
+                // Run command.
+                switch(options) {
+                    case "refresh":
+                        Instances[id].refresh();
+                        break;
+                }
+            });
+        }
+
+        /**
+         * Default settings.
+         */
+        var defaultSettings = {
+
+            // How many slides to show at the time.
+            visibleSlides: 3,
+
+
+            // Responsive adapters for visible slide amount,
+            // Example to add to this array: {match: function(w){ return w < 620 && w > 300; }, slides: 1}
+            visibleSlidesAdapters: [],
+
+            // Makes the last of the visible slides in viewport to be partly shown.
+            // Teaser effect to make users click next to see the full image / slide / video.
+            teaserSlidePercent: 50,
+
+            // rotate slides, when end of slide start on new when next button is clicked.
+            rotate: true,
+
+            // Video adapters.
+            videoAdapters: {},
+
+            // Cycle options ( see cycle documentation API for available options ).
+            cycleOptions: {},
+
+            // How should we crop the images? Examples: 16/9 , 4/3 , 1 etc.
+            // Set to 0 to disable auto crop / zoom effects.
+            aspectRatio: 16/9,
+
+            // Player max width when clicking on images / video thumbnails.
+            // Will be scaled down when in mobile view etc.
+            // Effective when screens are larger then 800 width!
+            playerMaxWidth: 800,
+
+            // Zooms to center if images was cropped, false to disable
+            zoomCenter: true,
+
+            // Kaltura video adapter options. Set the correct partner ID and kalturaPortal name.
+            kaltura: {
+                // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                partnerId: '1484431',
+                // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                uiconfId: '28551341',
+                // Where are your videos located? This will be used to replace video urls to actual preview images.
+                kalturaPortal: 'https://uia.mediaspace.kaltura.com',
+                // Image url, only change if kaltura changed format of thumbnail API.
+                imageUrl: 'http://www.kaltura.com/p/{partner_id}/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
+                embedArgs: 'iframeembed=true&playerId=kplayer&entry_id={entry_id}&flashvars[streamerType]=auto'
+            }
+        };
+
+
+        // This is the easiest way to have default options.
+        var settings = $.extend(defaultSettings, options);
+
+        // Allow to add video adapters (and override ).
+        $.fn.partSlideshow.adapters = $.extend($.fn.partSlideshow.adapters, settings.videoAdapters);
+
+        // Check for videoAdapters as callables, call these with supplied settings..
+        $.each($.fn.partSlideshow.adapters, function (index, adapter) {
+            if (typeof adapter === 'function') {
+                $.fn.partSlideshow.adapters[index] = adapter.call({}, settings);
+            }
+        });
+
+        return this.each(function () {
+            slideshowIterator++;
+            var $el = $(this);
+            var obj = $.fn.partSlideshow.Slideshow($el, settings, slideshowIterator);
+            obj.start();
+            Instances[$el.attr('id')] = obj;
+        });
+    };
+
+}( jQuery ));
+
+(function ($) {
+    'use strict';
+
+    $.fn.partSlideshow.adapters = {
 
         /**
          * Youtube
@@ -115,47 +217,15 @@
         }
     };
 
-
-    /**
-     * Scales an image based on what dimensions it should have, and centeres it perfectly. This means that images
-     * with the wrong aspect ratio also will be displayed just fine.
-     *
-     * @param $img
-     * @param shouldHaveWidth
-     * @param shouldHaveHeight
-     * @param zoomCenter
-     */
-    function scaleImg($img, shouldHaveWidth, shouldHaveHeight, zoomCenter) {
-
-        var h = $img.height(), w = $img.width(), diff;
-        var aspect = $img[0].naturalWidth / $img[0].naturalHeight; // IE8+.
-        if (h < shouldHaveHeight) {
-            while(h < shouldHaveHeight) {
-                h += 1;
-                w += aspect;
-            }
-            $img.width(w);
-        }
-
-        if (zoomCenter) {
-            if ($img.height() > shouldHaveHeight) {
-                diff = -($img.height() - shouldHaveHeight);
-                $img.css({'margin-top': (diff/2)+'px'});
-            }
-
-            if ($img.width() > shouldHaveWidth) {
-                diff = -($img.width() - shouldHaveWidth);
-                $img.css({'margin-left': (diff/2)+'px'});
-            }
-        }
-    }
-
+})(jQuery);
+(function ($) {
+    'use strict';
 
     /**
      * Player is a modal with transparent background and opacity background effect.
      * Used to pop out images and videos in large sizes when clicked.
      */
-    var Player = (function () {
+    $.fn.partSlideshow.Player = (function () {
 
         //
         // PRIVATE API
@@ -175,7 +245,7 @@
                 if ($links.length) {
                     $links.each(function () {
                         var $link = $(this);
-                        $.each(_videoAdapters, function (index, item) {
+                        $.each($.fn.partSlideshow.adapters, function (index, item) {
                             var url = $link.attr('href');
                             if (item.match(url)) {
                                 that.$slide.data('videoadapter', index);
@@ -191,11 +261,11 @@
                     }
                     return;
                 }
-                if (typeof _videoAdapters[that.$slide.data('videoadapter')].embed === 'undefined') {
+                if (typeof $.fn.partSlideshow.adapters[that.$slide.data('videoadapter')].embed === 'undefined') {
                     console.error("Video player for adapter '" + that.$slide.data('videoadapter') + "' was not found. Please implement the 'embed' key in the adapter.");
                     return;
                 } else {
-                    var $iframe = _videoAdapters[that.$slide.data('videoadapter')].embed(that.$a.attr('href'));
+                    var $iframe = $.fn.partSlideshow.adapters[that.$slide.data('videoadapter')].embed(that.$a.attr('href'));
                     $o = $('<div class="part-slider-video-wrapper"></div>');
                     $o.html($iframe);
                 }
@@ -329,10 +399,48 @@
         };
     })();
 
+})(jQuery);
+(function ($) {
+    'use strict';
 
 
-    var Slideshow = (function () {
 
+    /**
+     * Scales an image based on what dimensions it should have, and centeres it perfectly. This means that images
+     * with the wrong aspect ratio also will be displayed just fine.
+     *
+     * @param $img
+     * @param shouldHaveWidth
+     * @param shouldHaveHeight
+     * @param zoomCenter
+     */
+    function scaleImg($img, shouldHaveWidth, shouldHaveHeight, zoomCenter) {
+
+        var h = $img.height(), w = $img.width(), diff;
+        var aspect = $img[0].naturalWidth / $img[0].naturalHeight; // IE8+.
+        if (h < shouldHaveHeight) {
+            while(h < shouldHaveHeight) {
+                h += 1;
+                w += aspect;
+            }
+            $img.width(w);
+        }
+
+        if (zoomCenter) {
+            if ($img.height() > shouldHaveHeight) {
+                diff = -($img.height() - shouldHaveHeight);
+                $img.css({'margin-top': (diff/2)+'px'});
+            }
+
+            if ($img.width() > shouldHaveWidth) {
+                diff = -($img.width() - shouldHaveWidth);
+                $img.css({'margin-left': (diff/2)+'px'});
+            }
+        }
+    }
+
+
+    $.fn.partSlideshow.Slideshow = (function () {
 
         function prepareDOM ($el) {
             // Wrap object in some more appropriate divs.
@@ -370,7 +478,7 @@
                 if ($links.length) {
                     $links.each(function () {
                         var $link = $(this);
-                        $.each(_videoAdapters, function (index, item) {
+                        $.each($.fn.partSlideshow.adapters, function (index, item) {
                             var url = $link.attr('href');
                             if (item.match(url)) {
                                 var $image = $link.find('img');
@@ -388,7 +496,7 @@
 
 
 
-        return function ($el, settings) {
+        return function ($el, settings, slideshowIterator) {
 
 
             var id = "part-slider-" + slideshowIterator,
@@ -402,7 +510,7 @@
                 playerEvent: function (e) {
                     e.preventDefault();
                     var $a = $(this), $slide = $a.parents('.slide');
-                    new Player($el, $slide, $a, settings.playerMaxWidth).play();
+                    new $.fn.partSlideshow.Player($el, $slide, $a, settings.playerMaxWidth).play();
                 },
                 cycleScaleImages: function( ) {
                     $el.find('.slide img').each(function () {
@@ -433,7 +541,7 @@
                     // Free up mem.
                     if ($el.find('.slideshow').length) {
                         $el.find('.slideshow').cycle('destroy');
-                    }   
+                    }
 
                     $el.html(copy.clone(false));
 
@@ -552,102 +660,4 @@
         };
     })();
 
-
-    $.fn.partSlideshow = function( options ) {
-
-        if (typeof options === "string") {
-            return this.each(function () {
-                var $el = $(this), id = $el.attr('id');
-
-                if (typeof Instances[id] === 'undefined') {
-                    console.error("partSlideshow was not initialized, must be initialized before '" + options + "' is used.");
-                    return;
-                }
-
-                // Run command.
-                switch(options) {
-                    case "refresh":
-                        Instances[id].refresh();
-                        break;
-                }
-            });
-        }
-
-        /**
-         * Default settings.
-         */
-        var defaultSettings = {
-
-            // How many slides to show at the time.
-            visibleSlides: 3,
-
-
-            // Responsive adapters for visible slide amount,
-            // Example to add to this array: {match: function(w){ return w < 620 && w > 300; }, slides: 1}
-            visibleSlidesAdapters: [],
-
-            // Makes the last of the visible slides in viewport to be partly shown.
-            // Teaser effect to make users click next to see the full image / slide / video.
-            teaserSlidePercent: 50,
-
-            // rotate slides, when end of slide start on new when next button is clicked.
-            rotate: true,
-
-            // Video adapters.
-            videoAdapters: {},
-
-            // Cycle options ( see cycle documentation API for available options ).
-            cycleOptions: {},
-
-            // How should we crop the images? Examples: 16/9 , 4/3 , 1 etc.
-            // Set to 0 to disable auto crop / zoom effects.
-            aspectRatio: 16/9,
-
-            // Player max width when clicking on images / video thumbnails.
-            // Will be scaled down when in mobile view etc.
-            // Effective when screens are larger then 800 width!
-            playerMaxWidth: 800,
-
-            // Zooms to center if images was cropped, false to disable
-            zoomCenter: true,
-
-            // Kaltura video adapter options. Set the correct partner ID and kalturaPortal name.
-            kaltura: {
-                // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
-                partnerId: '1484431',
-                // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
-                uiconfId: '28551341',
-                // Where are your videos located? This will be used to replace video urls to actual preview images.
-                kalturaPortal: 'https://uia.mediaspace.kaltura.com',
-                // Image url, only change if kaltura changed format of thumbnail API.
-                imageUrl: 'http://www.kaltura.com/p/{partner_id}/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
-                embedArgs: 'iframeembed=true&playerId=kplayer&entry_id={entry_id}&flashvars[streamerType]=auto'
-            }
-        };
-
-
-        // This is the easiest way to have default options.
-        var settings = $.extend(defaultSettings, options);
-
-        // Allow to add video adapters (and override ).
-        _videoAdapters = $.extend(_videoAdapters, settings.videoAdapters);
-
-        // Check for videoAdapters as callables, call these with supplied settings..
-        $.each(_videoAdapters, function (index, adapter) {
-            if (typeof adapter === 'function') {
-                _videoAdapters[index] = adapter.call({}, settings);
-            }
-        });
-
-
-
-        return this.each(function () {
-            slideshowIterator++;
-            var $el = $(this);
-            var obj = new Slideshow($el, settings);
-            obj.start();
-            Instances[$el.attr('id')] = obj;
-        });
-    };
-
-}( jQuery ));
+})(jQuery);

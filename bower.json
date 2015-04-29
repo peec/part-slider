@@ -1,12 +1,12 @@
 {
   "name": "jquery-partslider",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/peec/part-slider",
   "authors": [
     "Petter Kjelkenes <kjelkenes@gmail.com>"
   ],
   "description": "Advanced slideshow based on jQuery and Cycle2",
-  "main": "build/jquery.partslider.js",
+  "main": "dist/jquery.partslider.js",
   "keywords": [
     "slideshow",
     "carousel",
@@ -20,9 +20,12 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "example"
   ],
   "dependencies": {
-    "jquery-cycle2": ">=2.1"
+    "jquery-cycle2": ">=2.1",
+    "components-font-awesome": ">=4.0",
+    "jQuery": ">=1.10"
   }
 }

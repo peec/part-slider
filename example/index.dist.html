@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+    <title>Part Slider</title>
+    <script src="../bower_components/jQuery/dist/jquery.min.js"></script>
+    <script src="../bower_components/jquery-cycle2/build/jquery.cycle2.js"></script>
+    <script src="../bower_components/jquery-cycle2/build/plugin/jquery.cycle2.carousel.min.js"></script>
+    <script src="../bower_components/jquery-cycle2/build/plugin/jquery.cycle2.swipe.min.js"></script>
+    <link rel="stylesheet" href="../bower_components/components-font-awesome/css/font-awesome.min.css">
+    <script src="../dist/jquery.partslider.js"></script>
+    <link rel="stylesheet" href="../dist/jquery.partslider.css" type="text/css" />
+
+    <script>
+        $(function () {
+            $('.part-slider-1').partSlideshow({
+                visibleSlides: 3,
+                visibleSlidesAdapters: [
+                    // Show 2 for mobile, 3 is a bit to much.
+                    {match: function(screenWidth){ return screenWidth < 620; }, slides: 2}
+                ]
+            });
+            $('.part-slider-2').partSlideshow({
+                visibleSlides: 2,
+                aspectRatio: 4/3,
+                cycleOptions: {
+                    swipe: true // requires the jquery.cycle2.swipe.js plugin.
+                },
+                rotate: false,
+                teaserSlidePercent: 70
+            });
+        });
+    </script>
+</head>
+<body>
+
+
+<!-- 16/9 -->
+
+<div class="part-slider part-slider-1">
+
+    <div class="slide">
+        <a data-modal href="images/1.jpg">
+            <img src="images/1.jpg">
+        </a>
+    </div>
+
+    <div class="slide">
+        <img src="images/43/1.jpg">
+    </div>
+
+    <div class="slide video">
+        <a data-modal href="https://uia.mediaspace.kaltura.com/media/-+Norwegians+are+awesome%21/1_iaju9jvc"></a>
+    </div>
+
+    <div class="slide video">
+        <a href="https://www.youtube.com/watch?v=JvUMV1N7eGM"></a>
+    </div>
+    <div class="slide video">
+        <a href="https://vimeo.com/16292317"></a>
+    </div>
+    <div class="slide">
+        <img src="images/4.jpg">
+        <div class="info">
+            <p>This is a sample image with text.</p>
+        </div>
+    </div>
+    <div class="slide">
+        <img src="images/3.jpg">
+    </div>
+
+    <div class="slide video">
+        <a data-modal href="https://www.youtube.com/watch?v=yFLtfaJwyfw">
+            <img src="http://img.youtube.com/vi/yFLtfaJwyfw/maxresdefault.jpg">
+        </a>
+    </div>
+
+</div>
+
+<!-- 4/3 -->
+
+
+
+<div class="part-slider part-slider-2">
+    <div class="slide">
+        <img src="images/1.jpg">
+    </div>
+    <div class="slide">
+        <img src="images/43/1.jpg">
+    </div>
+
+    <div class="slide">
+        <img src="images/43/2.jpg">
+    </div>
+
+    <div class="slide">
+        <img src="images/43/3.jpg">
+    </div>
+</div>
+
+
+</body>
+</html>

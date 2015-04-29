@@ -8,11 +8,9 @@ The idea is to have a slideshow that shows X amount of images, the last one is "
 to click on the Next arrow to see more.
 
 
+## HOW DOES IT LOOK:
 
-## EXAMPLE:
-
-![Sample of 2 slideshows](https://raw.github.com/peec/part-slider/master/images/screenshot.png)
-
+You may take a look (by default)?: See [This screenshot](https://raw.github.com/peec/part-slider/master/example/images/screenshot.png).
 
 
 ### FEATURES
@@ -41,14 +39,30 @@ to click on the Next arrow to see more.
 - Font-awesome for the next / prev arrows. ( not required ).
 
 
-
 ### INSTALLATION:
 
-See `index.html` file in this repository.
+Install via bower:
 
+```
+bower install jquery-partslider
+```
+
+```
+
+```
+
+
+Install manually:
+
+1. Download this repository via git or zip.
+1. Include jQuery and Cycle2 + Cycle2 Carousel plugin .
+1. Include dist/jquery.partslider.min.css and dist/jquery.partslider.min.js.
 
 
 ## DOCUMENTATION
+
+### Including the library
+
 
 
 ### The HTML
@@ -65,10 +79,12 @@ Slider container should have the class `part-slider` to inherit the standard sty
 **Adding image slides that can be opened in a modal.**
 
 ```
-<div class="slide">
-    <a data-modal href="images/1.jpg">
-        <img src="images/1.jpg">
-    </a>
+<div class="part-slider" id="my-id">
+    <div class="slide">
+        <a data-modal href="images/1.jpg">
+            <img src="images/1.jpg">
+        </a>
+    </div>
 </div>
 ```
 
@@ -145,13 +161,24 @@ Available options:
 
 
 ```
-
 var defaultSettings = {
     // How many slides to show at the time.
     visibleSlides: 3,
 
+
+    // Responsive adapters for visible slide amount,
+    // Example to add to this array: {match: function(w){ return w < 620 && w > 300; }, slides: 1}
+    visibleSlidesAdapters: [],
+
+    // Makes the last of the visible slides in viewport to be partly shown.
+    // Teaser effect to make users click next to see the full image / slide / video.
+    teaserSlidePercent: 50,
+
+    // rotate slides, when end of slide start on new when next button is clicked.
+    rotate: true,
+
     // Video adapters.
-    videoAdapters: [],
+    videoAdapters: {},
 
     // Cycle options ( see cycle documentation API for available options ).
     cycleOptions: {},
@@ -285,3 +312,17 @@ Add custom size adapters to customize how many visible slides it should be per s
 </script>
 
 ```
+
+
+#### Manual refresh of slideshow
+
+If you resize the slideshow manually with some javascript after page initialization, you will need to refresh the slideshow dimension and calculations.
+
+Use the `refresh` command like so.
+
+```javascript
+// Do some resizing of .part-slideshow
+$('.part-slider').partSlideshow("refresh");
+```
+
+
