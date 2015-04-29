@@ -3,8 +3,7 @@ node_js:
   - "0.12"
 
 before_script:
-  - sudo npm install -g grunt
-  - sudo npm install -g bower
+  - npm install -g bower
   - bower install
 
 script: grunt qunit --verbose --force
