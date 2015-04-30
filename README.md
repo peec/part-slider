@@ -171,6 +171,7 @@ Available options:
 
 ```
 var defaultSettings = {
+
     // How many slides to show at the time.
     visibleSlides: 3,
 
@@ -215,7 +216,10 @@ var defaultSettings = {
         // Image url, only change if kaltura changed format of thumbnail API.
         imageUrl: 'http://www.kaltura.com/p/{partner_id}/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
         embedArgs: 'iframeembed=true&playerId=kplayer&entry_id={entry_id}&flashvars[streamerType]=auto'
-    }
+    },
+
+    // Stretches left / right to a containers element.
+    stretchToContainer: false
 };
 
 ```

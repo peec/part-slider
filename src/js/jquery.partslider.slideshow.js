@@ -182,7 +182,7 @@
 
                     // Init CYCLE
                     var cycleOpts = $.extend({
-                        slides: '> .slide',
+                        slides: '> .slide:not(.static)',
                         next: '#'+id+' .cycle-next',
                         prev: '#'+id+' .cycle-prev',
                         log: false,
@@ -220,6 +220,30 @@
                         $el.trigger('part-slider:refresh');
                     }
                 },
+                containerStretchCycleNext: function () {
+                    var windowW = $('body').innerWidth(), sW = settings.stretchToContainer.width();
+                    var m = -((windowW - sW) / 2);
+                    $el.css({'padding-left': -m + 'px'}); // note positive (-- = + )....
+                    $el.css({'margin-left': m + 'px'});
+                },
+                containerStretchEventRefresh: function () {
+                    var windowW = $('body').innerWidth(), sW = settings.stretchToContainer.width();
+                    var m = -((windowW - sW) / 2);
+                    $el.css({'margin-right': m + 'px'});
+
+
+                    $el.partSlideshow('refresh');
+
+                    var paddingRight = m;
+                    if (paddingRight >= -25 && paddingRight <= 25) {
+                        paddingRight = -25;
+                    }
+
+
+                    // Call-stack move back or it will fail..
+                    setTimeout(function () { $el.find('.cycle-next').css({'padding-right': (-(paddingRight)) + 'px'}); }, 1);
+                    setTimeout(function () { $el.find('.cycle-prev').css({'padding-left': (-(m)) + 'px'}); }, 1);
+                },
                 bind: function () {
                     // Listen on events.
                     $el.on( 'cycle-next', Events.cycleScaleImages);
@@ -228,9 +252,14 @@
                     $el.on( 'cycle-prev', Events.cycleScaleImages);
                     $(window).resize(Events.resizeSlides);
                     $el.on('click','.slide a[data-modal]', Events.playerEvent);
+
+                    if (settings.stretchToContainer) {
+                        $(document).on('cycle-next','.part-slider .slideshow', Events.containerStretchCycleNext);
+                        $el.on('part-slider:refresh', Events.containerStretchEventRefresh);
+                        $el.css({'width': 'auto'});
+                    }
                 }
             };
-
 
             return {
                 start: function  () {
