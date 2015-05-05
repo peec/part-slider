@@ -71,17 +71,32 @@
             // Zooms to center if images was cropped, false to disable
             zoomCenter: true,
 
-            // Kaltura video adapter options. Set the correct partner ID and kalturaPortal name.
+            // Kaltura video adapters options. Set the correct partner ID and kalturaPortal name.
             kaltura: {
-                // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
-                partnerId: '1484431',
-                // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
-                uiconfId: '28551341',
-                // Where are your videos located? This will be used to replace video urls to actual preview images.
-                kalturaPortal: 'https://uia.mediaspace.kaltura.com',
-                // Image url, only change if kaltura changed format of thumbnail API.
-                imageUrl: 'http://www.kaltura.com/p/{partner_id}/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
-                embedArgs: 'iframeembed=true&playerId=kplayer&entry_id={entry_id}&flashvars[streamerType]=auto'
+                'uia_mediaspace': {
+                    // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                    partnerId: '1484431',
+                    // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                    uiconfId: '28551341',
+                    // Where are your videos located? This will be used to replace video urls to actual preview images.
+                    kalturaPortal: 'https://uia.mediaspace.kaltura.com',
+                    // Image url, only change if kaltura changed format of thumbnail API.
+                    imageUrl: 'http://www.kaltura.com/p/{partner_id}/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
+                    embedArgs: 'iframeembed=true&playerId=kplayer&entry_id={entry_id}&flashvars[streamerType]=auto',
+                    iframeDomain: '//cdnapi.kaltura.com'
+                },
+                'uia_video': {
+                    // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                    partnerId: '101',
+                    // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                    uiconfId: '23448251',
+                    // Where are your videos located? This will be used to replace video urls to actual preview images.
+                    kalturaPortal: 'https://video.uia.no',
+                    // Image url, only change if kaltura changed format of thumbnail API.
+                    imageUrl: 'https://kaltura.uia.no/p/101/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
+                    embedArgs: 'iframeembed=true&playerId=kaltura_player&entry_id={entry_id}&flashvars[streamerType]=auto',
+                    iframeDomain: '//kaltura.uia.no'
+                }
             },
 
             // Stretches left / right to a containers element.
@@ -98,7 +113,8 @@
         // Check for videoAdapters as callables, call these with supplied settings..
         $.each($.fn.partSlideshow.adapters, function (index, adapter) {
             if (typeof adapter === 'function') {
-                $.fn.partSlideshow.adapters[index] = adapter.call({}, settings);
+                delete $.fn.partSlideshow.adapters[index];
+                adapter.apply({}, [settings, $.fn.partSlideshow.adapters]);
             }
         });
 

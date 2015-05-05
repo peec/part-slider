@@ -70,35 +70,43 @@
          * @param settings
          * @returns {{regex: Function, match: Function, videoId: Function, image: Function, embed: Function}}
          */
-        kaltura: function (settings) {
-            // Configurable by settings so place here.
-            return {
-                regex: function () {
-                    return new RegExp('^'+settings.kaltura.kalturaPortal + '.*\/([0-9]_[0-9a-zA-Z-_]+)(/|$)', 'i');
-                },
-                match: function (url) {
-                    return url.match(this.regex());
-                },
-                videoId: function (url) {
-                    var matches = this.regex().exec(url);
-                    return matches && matches[1];
-                },
-                image: function (url, $link) {
-                    // http://www.kaltura.com/p/1484431/thumbnail/entry_id/1_iaju9jvc?width=600
-                    var id = this.videoId(url),
-                        useUrl = settings.kaltura.imageUrl.replace('{partner_id}', settings.kaltura.partnerId).replace('{entry_id}', id);
+        kaltura: function (settings, adapters) {
 
-                    $link.append($("<img src='"+useUrl+"' />"));
-                    return $.Deferred().resolve().promise();
-                },
-                embed: function (url) {
-                    var id = this.videoId(url);
-                    var $iframe = $('<iframe src="" width="560" height="395" allowfullscreen webkitallowfullscreen mozAllowFullScreen frameborder="0"></iframe>');
-                    $iframe.attr('src', '//cdnapi.kaltura.com/p/'+settings.kaltura.partnerId+'/sp/'+settings.kaltura.partnerId+'00/embedIframeJs/uiconf_id/' + settings.kaltura.uiconfId +
-                        '/partner_id/'+settings.kaltura.partnerId+'?' + settings.kaltura.embedArgs.replace('{entry_id}', id));
-                    return $iframe;
-                }
-            };
+            $.each(settings.kaltura, function (index, adapterSettings) {
+                adapters[index] = {
+                    regex: function () {
+                        return new RegExp('^'+adapterSettings.kalturaPortal + '.*\/([0-9]_[0-9a-zA-Z-_]+)(/|$)', 'i');
+                    },
+                    match: function (url) {
+                        return url.match(this.regex());
+                    },
+                    videoId: function (url) {
+                        var matches = this.regex().exec(url);
+                        return matches && matches[1];
+                    },
+                    image: function (url, $link) {
+                        // http://www.kaltura.com/p/1484431/thumbnail/entry_id/1_iaju9jvc?width=600
+                        var id = this.videoId(url),
+                            useUrl = adapterSettings.imageUrl.replace('{partner_id}', adapterSettings.partnerId).replace('{entry_id}', id);
+
+                        $link.append($("<img src='"+useUrl+"' />"));
+                        return $.Deferred().resolve().promise();
+                    },
+                    embed: function (url) {
+                        var id = this.videoId(url);
+                        var $iframe = $('<iframe src="" width="560" height="395" allowfullscreen webkitallowfullscreen mozAllowFullScreen frameborder="0"></iframe>');
+
+                        if (adapterSettings.iframeSrc) {
+                            $iframe.attr('src', adapterSettings.iframeSrc(id, adapterSettings));
+                        } else {
+                            $iframe.attr('src', (adapterSettings.iframeDomain || '//cdnapi.kaltura.com')+'/p/'+adapterSettings.partnerId+'/sp/'+adapterSettings.partnerId+'00/embedIframeJs/uiconf_id/' + adapterSettings.uiconfId +
+                                '/partner_id/'+adapterSettings.partnerId+'?' + adapterSettings.embedArgs.replace('{entry_id}', id));
+                        }
+
+                        return $iframe;
+                    }
+                };
+            });
         }
     };
 

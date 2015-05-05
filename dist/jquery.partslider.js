@@ -74,17 +74,32 @@
             // Zooms to center if images was cropped, false to disable
             zoomCenter: true,
 
-            // Kaltura video adapter options. Set the correct partner ID and kalturaPortal name.
+            // Kaltura video adapters options. Set the correct partner ID and kalturaPortal name.
             kaltura: {
-                // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
-                partnerId: '1484431',
-                // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
-                uiconfId: '28551341',
-                // Where are your videos located? This will be used to replace video urls to actual preview images.
-                kalturaPortal: 'https://uia.mediaspace.kaltura.com',
-                // Image url, only change if kaltura changed format of thumbnail API.
-                imageUrl: 'http://www.kaltura.com/p/{partner_id}/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
-                embedArgs: 'iframeembed=true&playerId=kplayer&entry_id={entry_id}&flashvars[streamerType]=auto'
+                'uia_mediaspace': {
+                    // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                    partnerId: '1484431',
+                    // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                    uiconfId: '28551341',
+                    // Where are your videos located? This will be used to replace video urls to actual preview images.
+                    kalturaPortal: 'https://uia.mediaspace.kaltura.com',
+                    // Image url, only change if kaltura changed format of thumbnail API.
+                    imageUrl: 'http://www.kaltura.com/p/{partner_id}/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
+                    embedArgs: 'iframeembed=true&playerId=kplayer&entry_id={entry_id}&flashvars[streamerType]=auto',
+                    iframeDomain: '//cdnapi.kaltura.com'
+                },
+                'uia_video': {
+                    // Your unique partner ID, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                    partnerId: '101',
+                    // for an actual player id, see https://knowledge.kaltura.com/embedding-kaltura-media-players-your-site
+                    uiconfId: '23448251',
+                    // Where are your videos located? This will be used to replace video urls to actual preview images.
+                    kalturaPortal: 'https://video.uia.no',
+                    // Image url, only change if kaltura changed format of thumbnail API.
+                    imageUrl: 'https://kaltura.uia.no/p/101/thumbnail/entry_id/{entry_id}?src_h=1080&width=1920', // src_x=0&src=y=0&src_w=1920&
+                    embedArgs: 'iframeembed=true&playerId=kaltura_player&entry_id={entry_id}&flashvars[streamerType]=auto',
+                    iframeDomain: '//kaltura.uia.no'
+                }
             },
 
             // Stretches left / right to a containers element.
@@ -101,7 +116,8 @@
         // Check for videoAdapters as callables, call these with supplied settings..
         $.each($.fn.partSlideshow.adapters, function (index, adapter) {
             if (typeof adapter === 'function') {
-                $.fn.partSlideshow.adapters[index] = adapter.call({}, settings);
+                delete $.fn.partSlideshow.adapters[index];
+                adapter.apply({}, [settings, $.fn.partSlideshow.adapters]);
             }
         });
 
@@ -188,35 +204,43 @@
          * @param settings
          * @returns {{regex: Function, match: Function, videoId: Function, image: Function, embed: Function}}
          */
-        kaltura: function (settings) {
-            // Configurable by settings so place here.
-            return {
-                regex: function () {
-                    return new RegExp('^'+settings.kaltura.kalturaPortal + '.*\/([0-9]_[0-9a-zA-Z-_]+)(/|$)', 'i');
-                },
-                match: function (url) {
-                    return url.match(this.regex());
-                },
-                videoId: function (url) {
-                    var matches = this.regex().exec(url);
-                    return matches && matches[1];
-                },
-                image: function (url, $link) {
-                    // http://www.kaltura.com/p/1484431/thumbnail/entry_id/1_iaju9jvc?width=600
-                    var id = this.videoId(url),
-                        useUrl = settings.kaltura.imageUrl.replace('{partner_id}', settings.kaltura.partnerId).replace('{entry_id}', id);
+        kaltura: function (settings, adapters) {
 
-                    $link.append($("<img src='"+useUrl+"' />"));
-                    return $.Deferred().resolve().promise();
-                },
-                embed: function (url) {
-                    var id = this.videoId(url);
-                    var $iframe = $('<iframe src="" width="560" height="395" allowfullscreen webkitallowfullscreen mozAllowFullScreen frameborder="0"></iframe>');
-                    $iframe.attr('src', '//cdnapi.kaltura.com/p/'+settings.kaltura.partnerId+'/sp/'+settings.kaltura.partnerId+'00/embedIframeJs/uiconf_id/' + settings.kaltura.uiconfId +
-                        '/partner_id/'+settings.kaltura.partnerId+'?' + settings.kaltura.embedArgs.replace('{entry_id}', id));
-                    return $iframe;
-                }
-            };
+            $.each(settings.kaltura, function (index, adapterSettings) {
+                adapters[index] = {
+                    regex: function () {
+                        return new RegExp('^'+adapterSettings.kalturaPortal + '.*\/([0-9]_[0-9a-zA-Z-_]+)(/|$)', 'i');
+                    },
+                    match: function (url) {
+                        return url.match(this.regex());
+                    },
+                    videoId: function (url) {
+                        var matches = this.regex().exec(url);
+                        return matches && matches[1];
+                    },
+                    image: function (url, $link) {
+                        // http://www.kaltura.com/p/1484431/thumbnail/entry_id/1_iaju9jvc?width=600
+                        var id = this.videoId(url),
+                            useUrl = adapterSettings.imageUrl.replace('{partner_id}', adapterSettings.partnerId).replace('{entry_id}', id);
+
+                        $link.append($("<img src='"+useUrl+"' />"));
+                        return $.Deferred().resolve().promise();
+                    },
+                    embed: function (url) {
+                        var id = this.videoId(url);
+                        var $iframe = $('<iframe src="" width="560" height="395" allowfullscreen webkitallowfullscreen mozAllowFullScreen frameborder="0"></iframe>');
+
+                        if (adapterSettings.iframeSrc) {
+                            $iframe.attr('src', adapterSettings.iframeSrc(id, adapterSettings));
+                        } else {
+                            $iframe.attr('src', (adapterSettings.iframeDomain || '//cdnapi.kaltura.com')+'/p/'+adapterSettings.partnerId+'/sp/'+adapterSettings.partnerId+'00/embedIframeJs/uiconf_id/' + adapterSettings.uiconfId +
+                                '/partner_id/'+adapterSettings.partnerId+'?' + adapterSettings.embedArgs.replace('{entry_id}', id));
+                        }
+
+                        return $iframe;
+                    }
+                };
+            });
         }
     };
 
