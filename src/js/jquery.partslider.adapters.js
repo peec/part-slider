@@ -74,7 +74,7 @@
             // Configurable by settings so place here.
             return {
                 regex: function () {
-                    return new RegExp('^'+settings.kaltura.kalturaPortal + '.*\/([0-9]_[0-9a-zA-Z-_]+)$', 'i');
+                    return new RegExp('^'+settings.kaltura.kalturaPortal + '.*\/([0-9]_[0-9a-zA-Z-_]+)(/|$)', 'i');
                 },
                 match: function (url) {
                     return url.match(this.regex());

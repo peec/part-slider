@@ -1,4 +1,4 @@
-/*! Partslider - v0.0.2 - 2015-04-30
+/*! Partslider - v0.0.2 - 2015-05-05
 * https://github.com/peec/part-slider
 * Copyright (c) 2015 Petter Kjelkenes; Licensed MIT */
 
@@ -192,7 +192,7 @@
             // Configurable by settings so place here.
             return {
                 regex: function () {
-                    return new RegExp('^'+settings.kaltura.kalturaPortal + '.*\/([0-9]_[0-9a-zA-Z-_]+)$', 'i');
+                    return new RegExp('^'+settings.kaltura.kalturaPortal + '.*\/([0-9]_[0-9a-zA-Z-_]+)(/|$)', 'i');
                 },
                 match: function (url) {
                     return url.match(this.regex());
